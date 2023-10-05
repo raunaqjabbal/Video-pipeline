@@ -1,5 +1,5 @@
 __pycache__
-SunoSpeaker0
+# SunoSpeaker0
 LIHQ/first_order_model/vox-cpk.pth.tar
 LIHQ/Wav2Lip/checkpoints/wav2lip_gan.pth
 LIHQ/Wav2Lip/checkpoints/wav2lip.pth
