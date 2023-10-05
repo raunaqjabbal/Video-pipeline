@@ -2,7 +2,7 @@ moviepy
 nltk
 transformers
 
-
+llvmlite‑0.35.0‑cp39‑cp39‑win_amd64.whl
 # Real-ESRGAN
 setuptools==58.2.0
 
