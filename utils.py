@@ -37,6 +37,8 @@ def generate_audio(textdataset, audiopath="intermediate", speaker = 1):
     print("Generating Audio...")
     
     for sample, text in textdataset:
+        if not os.path.exists(os.path.join(audiopath, sample)):
+            os.makedirs(os.path.join(audiopath, sample))
         for text in tqdm(text):
             
             tokenizedtext=[] 
