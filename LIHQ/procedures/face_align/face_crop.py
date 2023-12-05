@@ -10,7 +10,8 @@ from drive import open_url
 import dlib
 from mpl_toolkits.axes_grid1 import ImageGrid
 from bicubic import BicubicDownSample
-
+import gdown
+import os
 ######################################
 # Stolen (and modified) from PULSE face depixelization
 # https://github.com/adamian98/pulse
@@ -18,8 +19,19 @@ from bicubic import BicubicDownSample
 
 def crop_face(filename, outfile):
     #downloading model weights
-    f=open_url("https://drive.google.com/uc?id=1huhv8PYpNNKbGCLOaYUjOgR1pY5pmbJx", cache_dir="cache", return_path=True)
-    predictor = dlib.shape_predictor(f)
+    
+    if not os.path.exists("DEMO"):
+        os.makedirs("DEMO")
+
+    # Download the file from Google Drive
+    file_path = os.path.join(cache_dir, "shape_predictor.dat")
+
+    gdown.download("https://drive.google.com/uc?id=1huhv8PYpNNKbGCLOaYUjOgR1pY5pmbJx", file_path, quiet=False)
+    predictor = dlib.shape_predictor(file_path)
+    
+
+    # f=open_url("https://drive.google.com/uc?id=1huhv8PYpNNKbGCLOaYUjOgR1pY5pmbJx", cache_dir="cache", return_path=True)
+    # predictor = dlib.shape_predictor(f)
 
     toPIL = torchvision.transforms.ToPILImage()
     toTensor = torchvision.transforms.ToTensor()
