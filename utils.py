@@ -35,25 +35,26 @@ def upscale_image(inputpath, outputpath):
 def generate_audio(textdataset, audiopath="intermediate", speaker = 1):
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
     processor = AutoProcessor.from_pretrained("suno/bark-small")
-    model = AutoModel.from_pretrained("suno/bark-small").to(device)
+
+    model = AutoModel.from_pretrained("suno/bark-small",torch_dtype=torch.float16).to(device)
+    model.enable_cpu_offload()
+
+
     print("Generating Audio...")
     
     for sample, texts in tqdm(textdataset.items()):
         if not os.path.exists(os.path.join(audiopath, sample)):
             os.makedirs(os.path.join(audiopath, sample))
         for text in texts:
-            
-            tokenizedtext=[] 
+            count = 1            
             indexes=[]
-
+            speech_values=[]
             for idx,i in enumerate(text):
                 demo = nltk.sent_tokenize(i)
                 indexes += [idx]*len(demo)
-                tokenizedtext += demo
-            inputs = processor(text=tokenizedtext,return_tensors="pt",voice_preset = "v2/en_speaker_"+str(speaker)) 
-            inputs = {key:value.to(device) for key,value in inputs.items()}
-            speech_values = model.generate(**inputs).cpu().numpy().squeeze() 
-            count = 1
+                inputs = processor(text=demo,voice_preset = "v2/en_speaker_"+str(speaker)) 
+                # inputs = {key:value.to(device) for key,value in inputs.items()}
+                speech_values.append(model.generate(**inputs.to(device)).cpu().numpy().squeeze())
             
             
             partaudio=np.array([0]*int(0.25 * model.generation_config.sample_rate), dtype=np.float64)
