@@ -11,6 +11,8 @@ import numpy as np
 import os
 import scipy
 import nltk
+nltk.download("punkt")
+
 import glob
 from tqdm import tqdm
 # codec="libx264"
@@ -36,17 +38,17 @@ def generate_audio(textdataset, audiopath="intermediate", speaker = 1):
     model = AutoModel.from_pretrained("suno/bark-small").to(device)
     print("Generating Audio...")
     
-    for sample, text in textdataset:
+    for sample, texts in tqdm(textdataset.items()):
         if not os.path.exists(os.path.join(audiopath, sample)):
             os.makedirs(os.path.join(audiopath, sample))
-        for text in tqdm(text):
+        for text in texts:
             
             tokenizedtext=[] 
             indexes=[]
 
-            for id,i in enumerate(text):
+            for idx,i in enumerate(text):
                 demo = nltk.sent_tokenize(i)
-                indexes += [id]*len(demo)
+                indexes += [idx]*len(demo)
                 tokenizedtext += demo
             inputs = processor(text=tokenizedtext,return_tensors="pt",voice_preset = "v2/en_speaker_"+str(speaker)) 
             inputs = {key:value.to(device) for key,value in inputs.items()}
