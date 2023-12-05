@@ -1,15 +1,6 @@
-from pathlib import Path
-from io import BytesIO
-from matplotlib import pyplot as plt
-from PIL import Image
 import torchvision
-from IPython import display
-import numpy as np
 from .shape_predictor import align_face
-from drive import open_url
 import dlib
-from mpl_toolkits.axes_grid1 import ImageGrid
-from bicubic import BicubicDownSample
 import gdown
 import os
 ######################################
