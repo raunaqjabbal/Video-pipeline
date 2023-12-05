@@ -34,13 +34,13 @@ librosa==0.9.1
 
 
 ########################################Already Installed in colab
-tensorboard==2.3.0 #VITS
-pandas #FOMM
-scikit-learn==0.19.2 #FOMM
-python-dateutil==2.7.3 #FOMM
-numba==0.48 #Wav2Lip
-Cython==0.29.21 #VITS
-imageio==2.3.0 #FOMM
-pytz==2018.5 #FOMM
-drive
-dlib 
+# tensorboard==2.3.0 #VITS
+# pandas #FOMM
+# scikit-learn==0.19.2 #FOMM
+# python-dateutil==2.7.3 #FOMM
+# numba==0.48 #Wav2Lip
+# Cython==0.29.21 #VITS
+# imageio==2.3.0 #FOMM
+# pytz==2018.5 #FOMM
+# drive
+# dlib 
