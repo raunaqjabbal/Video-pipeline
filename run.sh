@@ -39,12 +39,11 @@ gdown 1mcr7ALciuAsHCpLnrtG_eop5-EYhbCmz -O pretrained/modnet_photographic_portra
 cd ..
 cd ..
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-export PATH=$PATH:"$SCRIPT_DIR/LIHQ/first-order-model":"$SCRIPT_DIR/LIHQ/procedures"
+# SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# export PATH=$PATH:"$SCRIPT_DIR/LIHQ/first-order-model":"$SCRIPT_DIR/LIHQ/procedures"
 
 
 export SUNO_OFFLOAD_CPU=True
 export SUNO_USE_SMALL_MODELS=True
-
 
 python3 script.py
