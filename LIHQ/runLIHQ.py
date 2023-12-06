@@ -49,6 +49,7 @@ def run(face, audio_super = 'intermediate', ref_vid = 'inputs/ref_video/syn_refe
       #Expanding face array as needed
     while len(face) < len(aud_dir_names):
         face.append(face[0])
+        
     gc.collect()
     #FOMM
       #Cropping reference video
@@ -63,7 +64,8 @@ def run(face, audio_super = 'intermediate', ref_vid = 'inputs/ref_video/syn_refe
         FOMM_run(face[i], sub_clip, generator, kp_detector, adir, Round = "1")
         i+=1
     print("FOMM Success!")
-
+    
+    gc.collect()
     #Wav2Lip (Generating lip movement from audio)
     print("Running Wav2Lip")
     for adir in aud_dir_names:

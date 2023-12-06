@@ -147,7 +147,7 @@ def merge_audio_video(audiopath="intermediate",videopath="inputs/videos", type =
 def upscale_avatar(avatarpath="intermediate"):
     print("Upscaling avatars...")
     for i in tqdm(os.listdir(avatarpath)):
-        location = os.path.join(avatarpath,i,"avatar.mp4")
+        location = os.path.join(avatarpath,i,"Avatar.mp4")
         os.system(f"python Real-ESRGAN/inference_realesrgan_video.py -i {location} -n realesr-animevideov3 -s 2 --suffix x2 -o {os.path.join(avatarpath,i)}")
         
 # def upscale_avatar2(avatarpath):
