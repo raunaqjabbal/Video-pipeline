@@ -161,7 +161,7 @@ def upscale_avatar(avatarpath="intermediate"):
     print("Upscaling avatars...")
     for i in tqdm(os.listdir(avatarpath)):
         location = os.path.join(avatarpath,i,"Avatar.mp4")
-        os.system(f"python Real-ESRGAN/inference_realesrgan_video.py -i {location} -n realesr-animevideov3 -s 2 --suffix x2 -o {os.path.join(avatarpath,i)}")
+        os.system(f"python Real-ESRGAN/inference_realesrgan_video.py -i {location} -n realesr-animevideov3 -s 2 -o {os.path.join(avatarpath,i)}")
         
 # def upscale_avatar2(avatarpath):
 #     os.system(f"python Real-ESRGAN/inference_realesrgan_video.py -i {avatarpath} -n realesr-animevideov3 -s 2 --suffix x2 -o {avatarpath}")
@@ -174,7 +174,7 @@ def merge_video_avatar(avatarpath="intermediate", outputpath="results",  padding
         clip = _VideoFileClip(os.path.join(avatarpath,i,"Video.mp4"))
         clip1 = clip.without_audio()
 
-        clip2 = _VideoFileClip(os.path.join(avatarpath,i,"Avatar_x2.mp4"))
+        clip2 = _VideoFileClip(os.path.join(avatarpath,i,"Avatar.mp4"))
         clip2 = clip2.resize(0.20)
         print(clip1.duration==clip2.duration)
         if location=="right":
