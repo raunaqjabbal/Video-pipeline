@@ -26,7 +26,6 @@ cd ..
 cd LIHQ
 cd Wav2Lip
 ## Downloading model weights
-gdown 1eAtM-Ck5RMyMMZoQuoQfYZRU5vDDwBpK -O './checkpoints/wav2lip_gan.pth'
 gdown 1eAtM-Ck5RMyMMZoQuoQfYZRU5vDDwBpK -O './checkpoints/wav2lip.pth'
 wget "https://www.adrianbulat.com/downloads/python-fan/s3fd-619a316812.pth" -O "./face_detection/detection/sfd/s3fd.pth"
 cd ..

@@ -39,7 +39,7 @@ def combine_audiofiles(adir, audio_super):
         speech_n = AudioSegment.from_wav(audio_files[i])
         speech = speech + speech_n
     
-    speech.export(f'{audio_super}{adir}/{adir}.wav', format="wav")
+    speech.export(f'{audio_super}{adir}/Audio.wav', format="wav")
 
     for filez in audio_files:
       os.remove(filez)
