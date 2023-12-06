@@ -11,7 +11,6 @@ import numpy as np
 import os
 import scipy
 import nltk
-nltk.download("punkt")
 
 import glob
 from tqdm import tqdm
@@ -25,9 +24,7 @@ os.environ["SUNO_USE_SMALL_MODELS"] = "True"
 from bark.generation import generate_text_semantic,preload_models
 from bark.api import semantic_to_waveform
 from bark import generate_audio, SAMPLE_RATE
-preload_models(text_use_small=True, coarse_use_small=True, fine_use_small=True)
-
-
+t
 def upscale_image(inputpath, outputpath):
     os.system(f"python Real-ESRGAN/inference_gfpgan.py -i {inputpath} -o {outputpath} -v 1.3 -s 4 --bg_upsampler realesrgan")
 

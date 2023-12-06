@@ -39,4 +39,7 @@ gdown 1mcr7ALciuAsHCpLnrtG_eop5-EYhbCmz -O pretrained/modnet_photographic_portra
 cd ..
 cd ..
 
+export PATH=$PATH:/LIHQ/first-order-model
+export PATH=$PATH:/LIHQ/procedures
+
 python3 script.py
