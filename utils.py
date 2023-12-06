@@ -32,44 +32,76 @@ def upscale_image(inputpath, outputpath):
 #     audio = clip.audio
 #     audio.write_audiofile("CompleteAudio.mp3")
 
+# def generate_audio(textdataset, audiopath="intermediate", speaker = 1):
+#     device = 'cuda' if torch.cuda.is_available() else 'cpu'
+#     processor = AutoProcessor.from_pretrained("suno/bark-small")
+
+#     model = AutoModel.from_pretrained("suno/bark-small",torch_dtype=torch.float16).to(device)
+#     model.enable_cpu_offload()
+
+
+#     print("Generating Audio...")
+    
+#     for sample, texts in tqdm(textdataset.items()):
+#         if not os.path.exists(os.path.join(audiopath, sample)):
+#             os.makedirs(os.path.join(audiopath, sample))
+#         for text in texts:
+#             count = 1            
+#             indexes=[]
+#             speech_values=[]
+#             for idx,i in enumerate(text):
+#                 demo = nltk.sent_tokenize(i)
+#                 indexes += [idx]*len(demo)
+#                 inputs = processor(text=demo,voice_preset = "v2/en_speaker_"+str(speaker)) 
+#                 # inputs = {key:value.to(device) for key,value in inputs.items()}
+#                 speech_values.append(model.generate(**inputs.to(device)).cpu().numpy().squeeze())
+            
+            
+#             partaudio=np.array([0]*int(0.25 * model.generation_config.sample_rate), dtype=np.float64)
+#             for i,audio in enumerate(speech_values):
+#                 partaudio = np.concatenate([partaudio,audio])
+
+#                 if i==len(indexes)-1:
+#                     scipy.io.wavfile.write(os.path.join(audiopath,sample,str(count)+".wav"), rate=model.generation_config.sample_rate, data=partaudio)
+
+#                 elif indexes[i]!=indexes[i+1]:
+#                     partaudio = np.concatenate([partaudio,audio])
+#                     scipy.io.wavfile.write(os.path.join(audiopath,sample,str(count)+".wav"), rate=model.generation_config.sample_rate, data=partaudio)
+#                     partaudio=np.array([0]*int(0.25 * model.generation_config.sample_rate), dtype=np.float64)
+#                     count+=1
+
+
 def generate_audio(textdataset, audiopath="intermediate", speaker = 1):
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
     processor = AutoProcessor.from_pretrained("suno/bark-small")
-
     model = AutoModel.from_pretrained("suno/bark-small",torch_dtype=torch.float16).to(device)
     model.enable_cpu_offload()
 
-
-    print("Generating Audio...")
-    
+    print("Generating Audio...")    
     for sample, texts in tqdm(textdataset.items()):
         if not os.path.exists(os.path.join(audiopath, sample)):
             os.makedirs(os.path.join(audiopath, sample))
-        for text in texts:
-            count = 1            
-            indexes=[]
-            speech_values=[]
-            for idx,i in enumerate(text):
-                demo = nltk.sent_tokenize(i)
-                indexes += [idx]*len(demo)
-                inputs = processor(text=demo,voice_preset = "v2/en_speaker_"+str(speaker)) 
-                # inputs = {key:value.to(device) for key,value in inputs.items()}
-                speech_values.append(model.generate(**inputs.to(device)).cpu().numpy().squeeze())
             
-            
-            partaudio=np.array([0]*int(0.25 * model.generation_config.sample_rate), dtype=np.float64)
-            for i,audio in enumerate(speech_values):
+        for idx,i in enumerate(texts):
+            tokenized_sentence = nltk.sent_tokenize(i)
+            indexes += [idx]*len(tokenized_sentence)
+            newtxt += tokenized_sentence
+
+        inputs = processor(text=newtxt, return_tensors="pt", voice_preset="v2/en_speaker_"+str(speaker))
+        inputs = {key:value.to(device) for key,value in inputs.items()}
+        speech_values = model.generate(**inputs).cpu().numpy().squeeze()
+
+        count = 1
+        partaudio=np.array([0]*int(0.25 * model.generation_config.sample_rate), dtype=np.float64)
+        for i,audio in enumerate(speech_values):
+            partaudio = np.concatenate([partaudio,audio])
+            if i==len(indexes)-1:
+                scipy.io.wavfile.write(os.path.join(audiopath,sample,str(count)+".wav"), rate=model.generation_config.sample_rate, data=partaudio)
+            elif indexes[i]!=indexes[i+1]:
                 partaudio = np.concatenate([partaudio,audio])
-
-                if i==len(indexes)-1:
-                    scipy.io.wavfile.write(os.path.join(audiopath,sample,str(count)+".wav"), rate=model.generation_config.sample_rate, data=partaudio)
-
-                elif indexes[i]!=indexes[i+1]:
-                    partaudio = np.concatenate([partaudio,audio])
-                    scipy.io.wavfile.write(os.path.join(audiopath,sample,str(count)+".wav"), rate=model.generation_config.sample_rate, data=partaudio)
-                    partaudio=np.array([0]*int(0.25 * model.generation_config.sample_rate), dtype=np.float64)
-                    count+=1
-
+                scipy.io.wavfile.write(os.path.join(audiopath,sample,str(count)+".wav"), rate=model.generation_config.sample_rate, data=partaudio)
+                partaudio=np.array([0]*int(0.25 * model.generation_config.sample_rate), dtype=np.float64)
+                count+=1
 
 def concatenate_videos(videopath="intermediate"):
     print("Concatenting Videos...")
