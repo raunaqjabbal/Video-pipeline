@@ -11,27 +11,25 @@ import numpy as np
 import os
 import scipy
 import nltk
-
+import gc
 import glob
 from tqdm import tqdm
+import sys
 # codec="libx264"
 import shutil
 
-from LIHQ.procedures.face_align.face_crop import crop_face
-
+os.environ['SUNO_OFFLOAD_CPU'] = 'True'
+os.environ['SUNO_USE_SMALL_MODELS'] = 'True'
 from bark.generation import generate_text_semantic,preload_models
 from bark.api import semantic_to_waveform
 from bark import generate_audio, SAMPLE_RATE
-os.environ['SUNO_OFFLOAD_CPU'] = 'True'
-os.environ['SUNO_USE_SMALL_MODELS'] = 'True'
 
-import sys
-import os
-# # maindir = pathlib.Path(__file__).parent.resolve()
 sys.path.append(os.path.join( "LIHQ", "first_order_model"))
 sys.path.append(os.path.join( "LIHQ", "procedures"))
-from LIHQ import runLIHQ
 
+from LIHQ import runLIHQ
+from LIHQ.procedures.wav2lip_scripts import wav2lip_run
+from LIHQ.procedures.face_align.face_crop import crop_face
 
 
 def upscale_image(inputpath, outputpath):
@@ -115,6 +113,13 @@ def generate_audio2(textdataset, audiopath="intermediate", speaker = 1):
                 scipy.io.wavfile.write(os.path.join(audiopath,sample,"audio_"+str(count)+".wav"), rate=model.generation_config.sample_rate, data=np.int16(partaudio / 256.0))
                 partaudio=[]
                 count+=1
+
+
+def wav2lip(path="intermediate"):
+    gc.collect()
+    print("Running Wav2Lip")
+    for i in tqdm(os.listdir(path)):
+        wav2lip_run(i)
 
 def concatenate_videos(videopath="intermediate"):
     print("Concatenting Videos...")
