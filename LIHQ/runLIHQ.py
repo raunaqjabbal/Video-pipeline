@@ -9,7 +9,7 @@ import gc
 from .procedures.av_scripts import *
 
 
-from first_order_model.demo import load_checkpoints
+from .first_order_model.demo import load_checkpoints
 from .procedures.fomm_scripts import FOMM_chop_refvid, FOMM_run
 
 from .procedures.wav2lip_scripts import wav2lip_run

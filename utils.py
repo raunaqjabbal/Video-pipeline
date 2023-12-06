@@ -18,13 +18,11 @@ from tqdm import tqdm
 import shutil
 
 from LIHQ.procedures.face_align.face_crop import crop_face
-os.environ["SUNO_OFFLOAD_CPU"] = "True"
-os.environ["SUNO_USE_SMALL_MODELS"] = "True"
 
 from bark.generation import generate_text_semantic,preload_models
 from bark.api import semantic_to_waveform
 from bark import generate_audio, SAMPLE_RATE
-t
+
 def upscale_image(inputpath, outputpath):
     os.system(f"python Real-ESRGAN/inference_gfpgan.py -i {inputpath} -o {outputpath} -v 1.3 -s 4 --bg_upsampler realesrgan")
 
@@ -67,9 +65,9 @@ def generate_audio(textdataset, audiopath="intermediate", speaker = 1):
         for i,audio in enumerate(speech_values):
             partaudio = np.concatenate([partaudio,audio])
             if i==len(indexes)-1:
-                scipy.io.wavfile.write(os.path.join(audiopath,sample,str(count)+".wav"), rate=SAMPLE_RATE, data=np.array(partaudio))
+                scipy.io.wavfile.write(os.path.join(audiopath,sample,str(count)+".wav"), rate=SAMPLE_RATE, data=np.int16(partaudio / 256.0))
             elif indexes[i]!=indexes[i+1]:
-                scipy.io.wavfile.write(os.path.join(audiopath,sample,str(count)+".wav"), rate=SAMPLE_RATE, data=np.array(partaudio))
+                scipy.io.wavfile.write(os.path.join(audiopath,sample,str(count)+".wav"), rate=SAMPLE_RATE, data=np.int16(partaudio / 256.0))
                 partaudio=[]
                 count+=1
 
@@ -101,9 +99,9 @@ def generate_audio(textdataset, audiopath="intermediate", speaker = 1):
 #         for i,audio in enumerate(speech_values):
 #             partaudio = np.concatenate([partaudio,audio])
 #             if i==len(indexes)-1:
-#                 scipy.io.wavfile.write(os.path.join(audiopath,sample,str(count)+".wav"), rate=model.generation_config.sample_rate, data=partaudio)
+#                 scipy.io.wavfile.write(os.path.join(audiopath,sample,str(count)+".wav"), rate=model.generation_config.sample_rate, data=np.int16(partaudio / 256.0))
 #             elif indexes[i]!=indexes[i+1]:
-#                 scipy.io.wavfile.write(os.path.join(audiopath,sample,str(count)+".wav"), rate=model.generation_config.sample_rate, data=partaudio)
+#                 scipy.io.wavfile.write(os.path.join(audiopath,sample,str(count)+".wav"), rate=model.generation_config.sample_rate, data=np.int16(partaudio / 256.0))
 #                 partaudio=[]
 #                 count+=1
 
