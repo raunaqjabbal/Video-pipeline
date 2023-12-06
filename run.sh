@@ -42,4 +42,8 @@ cd ..
 export PATH=$PATH:/LIHQ/first-order-model
 export PATH=$PATH:/LIHQ/procedures
 
+export SUNO_OFFLOAD_CPU=True
+export SUNO_USE_SMALL_MODELS=True
+
+
 python3 script.py

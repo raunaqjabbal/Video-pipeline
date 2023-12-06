@@ -67,9 +67,9 @@ def generate_audio(textdataset, audiopath="intermediate", speaker = 1):
         for i,audio in enumerate(speech_values):
             partaudio = np.concatenate([partaudio,audio])
             if i==len(indexes)-1:
-                scipy.io.wavfile.write(os.path.join(audiopath,sample,str(count)+".wav"), rate=SAMPLE_RATE, data=partaudio)
+                scipy.io.wavfile.write(os.path.join(audiopath,sample,str(count)+".wav"), rate=SAMPLE_RATE, data=np.array(partaudio))
             elif indexes[i]!=indexes[i+1]:
-                scipy.io.wavfile.write(os.path.join(audiopath,sample,str(count)+".wav"), rate=SAMPLE_RATE, data=partaudio)
+                scipy.io.wavfile.write(os.path.join(audiopath,sample,str(count)+".wav"), rate=SAMPLE_RATE, data=np.array(partaudio))
                 partaudio=[]
                 count+=1
 
