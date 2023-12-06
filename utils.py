@@ -113,14 +113,14 @@ def concatenate_videos(videopath="intermediate"):
     for i in tqdm(os.listdir(videopath)):
         clips = [_VideoFileClip(os.path.join(j)) for j in sorted(glob.glob(os.path.join(videopath,i,"*video*")))]
         clip = _concatenate_videoclips(clips)
-        clip.write_videofile(os.path.join(videopath,i,"V.mp4"), verbose=False, logger=None)
+        clip.write_videofile(os.path.join(videopath,i,"Video.mp4"), verbose=False, logger=None)
 
 def concatenate_audios(audiopath="intermediate"):
     print("Concatenating Audios...")
     for i in tqdm(os.listdir(audiopath)):
         clips = [_AudioFileClip(os.path.join(j)) for j in sorted(glob.glob(os.path.join(audiopath,i,"*audio*")))]
         clip = _concatenate_audioclips(clips)
-        clip.write_audiofile(os.path.join(audiopath,i,"A.mp3"), verbose=False, logger=None)
+        clip.write_audiofile(os.path.join(audiopath,i,"Audio.wav"), verbose=False, logger=None)
 
 # Merge Audio with Video
 def merge_audio_video(audiopath="intermediate",videopath="inputs/videos", type = "delay"):
@@ -158,10 +158,10 @@ def merge_video_avatar(avatarpath="intermediate", outputpath="results",  padding
         os.makedirs(outputpath)
     print("Merging video with avatar... ")
     for i in tqdm(os.listdir(avatarpath)):
-        clip = _VideoFileClip(os.path.join(avatarpath,i,"V.mp4"))
+        clip = _VideoFileClip(os.path.join(avatarpath,i,"Video.mp4"))
         clip1 = clip.without_audio()
 
-        clip2 = _VideoFileClip(os.path.join(avatarpath,i,"avatar_x2.mp4"))
+        clip2 = _VideoFileClip(os.path.join(avatarpath,i,"Avatar_x2.mp4"))
         clip2 = clip2.resize(0.20)
         print(clip1.duration==clip2.duration)
         if location=="right":

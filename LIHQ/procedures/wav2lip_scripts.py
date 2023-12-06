@@ -22,3 +22,7 @@ def wav2lip_run(adir):
     sys.exit()
   os.chdir('..')
   os.chdir('..')
+  
+  if os.path.exists(out_path):
+    os.remove(vid_path)
+    os.remove

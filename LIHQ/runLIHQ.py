@@ -62,6 +62,7 @@ def run(face, audio_super = 'intermediate', ref_vid = 'inputs/ref_video/syn_refe
         gc.collect()
         sub_clip = f'./intermediate/{adir}/FOMM-chop.mp4'
         FOMM_run(face[i], sub_clip, generator, kp_detector, adir, Round = "1")
+        os.remmove(sub_clip)
         i+=1
     print("FOMM Success!")
     
