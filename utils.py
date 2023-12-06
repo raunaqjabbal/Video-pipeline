@@ -25,6 +25,14 @@ from bark import generate_audio, SAMPLE_RATE
 os.environ['SUNO_OFFLOAD_CPU'] = 'True'
 os.environ['SUNO_USE_SMALL_MODELS'] = 'True'
 
+import sys
+import os
+# # maindir = pathlib.Path(__file__).parent.resolve()
+sys.path.append(os.path.join( "LIHQ", "first_order_model"))
+sys.path.append(os.path.join( "LIHQ", "procedures"))
+from LIHQ import runLIHQ
+
+
 
 def upscale_image(inputpath, outputpath):
     os.system(f"python Real-ESRGAN/inference_gfpgan.py -i {inputpath} -o {outputpath} -v 1.3 -s 4 --bg_upsampler realesrgan")
