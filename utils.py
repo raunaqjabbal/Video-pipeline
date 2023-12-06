@@ -25,7 +25,7 @@ os.environ["SUNO_USE_SMALL_MODELS"] = "True"
 from bark.generation import generate_text_semantic,preload_models
 from bark.api import semantic_to_waveform
 from bark import generate_audio, SAMPLE_RATE
-preload_models()
+preload_models(text_use_small=True, coarse_use_small=True, fine_use_small=True)
 
 
 def upscale_image(inputpath, outputpath):
@@ -60,6 +60,7 @@ def generate_audio(textdataset, audiopath="intermediate", speaker = 1):
                 history_prompt=SPEAKER,
                 temp=GEN_TEMP,
                 min_eos_p=0.05,  # this controls how likely the generation is to end
+                silent=True
             )
             audio_array = semantic_to_waveform(semantic_tokens, history_prompt=SPEAKER, silent=True)
             speech_values += [audio_array]
