@@ -19,89 +19,95 @@ from tqdm import tqdm
 import shutil
 
 from LIHQ.procedures.face_align.face_crop import crop_face
+os.environ["SUNO_OFFLOAD_CPU"] = "True"
+os.environ["SUNO_USE_SMALL_MODELS"] = "True"
+
+from bark.generation import generate_text_semantic,preload_models
+from bark.api import semantic_to_waveform
+from bark import generate_audio, SAMPLE_RATE
+preload_models()
+
 
 def upscale_image(inputpath, outputpath):
     os.system(f"python Real-ESRGAN/inference_gfpgan.py -i {inputpath} -o {outputpath} -v 1.3 -s 4 --bg_upsampler realesrgan")
-
-
-
-
 
 # def demo():
 #     clip = VideoFileClip("drive/MyDrive/Content Video Production/non_interactive_sample (with audio)/FinalAV.mp4")
 #     audio = clip.audio
 #     audio.write_audiofile("CompleteAudio.mp3")
 
-# def generate_audio(textdataset, audiopath="intermediate", speaker = 1):
-#     device = 'cuda' if torch.cuda.is_available() else 'cpu'
-#     processor = AutoProcessor.from_pretrained("suno/bark-small")
-
-#     model = AutoModel.from_pretrained("suno/bark-small",torch_dtype=torch.float16).to(device)
-#     model.enable_cpu_offload()
-
-
-#     print("Generating Audio...")
-    
-#     for sample, texts in tqdm(textdataset.items()):
-#         if not os.path.exists(os.path.join(audiopath, sample)):
-#             os.makedirs(os.path.join(audiopath, sample))
-#         for text in texts:
-#             count = 1            
-#             indexes=[]
-#             speech_values=[]
-#             for idx,i in enumerate(text):
-#                 demo = nltk.sent_tokenize(i)
-#                 indexes += [idx]*len(demo)
-#                 inputs = processor(text=demo,voice_preset = "v2/en_speaker_"+str(speaker)) 
-#                 # inputs = {key:value.to(device) for key,value in inputs.items()}
-#                 speech_values.append(model.generate(**inputs.to(device)).cpu().numpy().squeeze())
-            
-            
-#             partaudio=np.array([0]*int(0.25 * model.generation_config.sample_rate), dtype=np.float64)
-#             for i,audio in enumerate(speech_values):
-#                 partaudio = np.concatenate([partaudio,audio])
-
-#                 if i==len(indexes)-1:
-#                     scipy.io.wavfile.write(os.path.join(audiopath,sample,str(count)+".wav"), rate=model.generation_config.sample_rate, data=partaudio)
-
-#                 elif indexes[i]!=indexes[i+1]:
-#                     partaudio = np.concatenate([partaudio,audio])
-#                     scipy.io.wavfile.write(os.path.join(audiopath,sample,str(count)+".wav"), rate=model.generation_config.sample_rate, data=partaudio)
-#                     partaudio=np.array([0]*int(0.25 * model.generation_config.sample_rate), dtype=np.float64)
-#                     count+=1
-
-
 def generate_audio(textdataset, audiopath="intermediate", speaker = 1):
-    device = 'cuda' if torch.cuda.is_available() else 'cpu'
-    processor = AutoProcessor.from_pretrained("suno/bark-small")
-    model = AutoModel.from_pretrained("suno/bark-small",torch_dtype=torch.float16).to(device)
-    model.enable_cpu_offload()
-
     print("Generating Audio...")    
     for sample, texts in tqdm(textdataset.items()):
         if not os.path.exists(os.path.join(audiopath, sample)):
             os.makedirs(os.path.join(audiopath, sample))
             
+        newtxt=[]
+        indexes=[]
         for idx,i in enumerate(texts):
             tokenized_sentence = nltk.sent_tokenize(i)
             indexes += [idx]*len(tokenized_sentence)
             newtxt += tokenized_sentence
 
-        inputs = processor(text=newtxt, return_tensors="pt", voice_preset="v2/en_speaker_"+str(speaker))
-        inputs = {key:value.to(device) for key,value in inputs.items()}
-        speech_values = model.generate(**inputs).cpu().numpy().squeeze()
+        GEN_TEMP = 0.6
+        SPEAKER = "v2/en_speaker_"+str(speaker)
+        silence = np.zeros(int(0.25 * SAMPLE_RATE))  # quarter second of silence
 
+        speech_values = []
+        for sentence in newtxt:
+            semantic_tokens = generate_text_semantic(
+                sentence,
+                history_prompt=SPEAKER,
+                temp=GEN_TEMP,
+                min_eos_p=0.05,  # this controls how likely the generation is to end
+            )
+            audio_array = semantic_to_waveform(semantic_tokens, history_prompt=SPEAKER, silent=True)
+            speech_values += [audio_array]
+        
         count = 1
-        partaudio=np.array([0]*int(0.25 * model.generation_config.sample_rate), dtype=np.float64)
+        partaudio=[]
         for i,audio in enumerate(speech_values):
             partaudio = np.concatenate([partaudio,audio])
             if i==len(indexes)-1:
-                scipy.io.wavfile.write(os.path.join(audiopath,sample,str(count)+".wav"), rate=model.generation_config.sample_rate, data=partaudio)
+                scipy.io.wavfile.write(os.path.join(audiopath,sample,str(count)+".wav"), rate=SAMPLE_RATE, data=partaudio)
             elif indexes[i]!=indexes[i+1]:
-                partaudio = np.concatenate([partaudio,audio])
-                scipy.io.wavfile.write(os.path.join(audiopath,sample,str(count)+".wav"), rate=model.generation_config.sample_rate, data=partaudio)
-                partaudio=np.array([0]*int(0.25 * model.generation_config.sample_rate), dtype=np.float64)
+                scipy.io.wavfile.write(os.path.join(audiopath,sample,str(count)+".wav"), rate=SAMPLE_RATE, data=partaudio)
+                partaudio=[]
                 count+=1
+
+
+# def generate_audio(textdataset, audiopath="intermediate", speaker = 1):
+#     device = 'cuda' if torch.cuda.is_available() else 'cpu'
+#     processor = AutoProcessor.from_pretrained("suno/bark-small")
+#     model = AutoModel.from_pretrained("suno/bark-small",torch_dtype=torch.float16).to(device)
+#     model.enable_cpu_offload()
+
+#     print("Generating Audio...")    
+#     for sample, texts in tqdm(textdataset.items()):
+#         if not os.path.exists(os.path.join(audiopath, sample)):
+#             os.makedirs(os.path.join(audiopath, sample))
+            
+#         newtxt=[]
+#         indexes=[]
+#         for idx,i in enumerate(texts):
+#             tokenized_sentence = nltk.sent_tokenize(i)
+#             indexes += [idx]*len(tokenized_sentence)
+#             newtxt += tokenized_sentence
+
+#         inputs = processor(text=newtxt, return_tensors="pt", voice_preset="v2/en_speaker_"+str(speaker))
+#         inputs = {key:value.to(device) for key,value in inputs.items()}
+#         speech_values = model.generate(**inputs).cpu().numpy().squeeze()
+
+#         count = 1
+#         partaudio=[]
+#         for i,audio in enumerate(speech_values):
+#             partaudio = np.concatenate([partaudio,audio])
+#             if i==len(indexes)-1:
+#                 scipy.io.wavfile.write(os.path.join(audiopath,sample,str(count)+".wav"), rate=model.generation_config.sample_rate, data=partaudio)
+#             elif indexes[i]!=indexes[i+1]:
+#                 scipy.io.wavfile.write(os.path.join(audiopath,sample,str(count)+".wav"), rate=model.generation_config.sample_rate, data=partaudio)
+#                 partaudio=[]
+#                 count+=1
 
 def concatenate_videos(videopath="intermediate"):
     print("Concatenting Videos...")
