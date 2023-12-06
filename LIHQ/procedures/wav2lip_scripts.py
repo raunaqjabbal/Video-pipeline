@@ -6,10 +6,7 @@ def wav2lip_run(adir):
   vid_path = f'{os.getcwd()}/intermediate/{adir}/FOMM-complete.mp4'
   aud_path = f'{os.getcwd()}/intermediate/{adir}/Audio.wav'
   out_path = f'{os.getcwd()}/intermediate/{adir}/Avatar.mp4'
-  print(os.getcwd())
-  print(vid_path)
   os.chdir('LIHQ/Wav2Lip')
-  print(os.getcwd())
   command = f'python inference.py --checkpoint_path checkpoints/wav2lip.pth --face {vid_path} --audio {aud_path} --outfile {out_path}  --pads 0 20 0 0'
   try:
     process = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
