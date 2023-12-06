@@ -83,38 +83,38 @@ def generate_audio(textdataset, audiopath="intermediate", speaker = 1):
                 count+=1
 
 
-# def generate_audio(textdataset, audiopath="intermediate", speaker = 1):
-#     device = 'cuda' if torch.cuda.is_available() else 'cpu'
-#     processor = AutoProcessor.from_pretrained("suno/bark-small")
-#     model = AutoModel.from_pretrained("suno/bark-small",torch_dtype=torch.float16).to(device)
-#     model.enable_cpu_offload()
+def generate_audio2(textdataset, audiopath="intermediate", speaker = 1):
+    device = 'cuda' if torch.cuda.is_available() else 'cpu'
+    processor = AutoProcessor.from_pretrained("suno/bark-small")
+    model = AutoModel.from_pretrained("suno/bark-small",torch_dtype=torch.float16).to(device)
+    model.enable_cpu_offload()
 
-#     print("Generating Audio...")    
-#     for sample, texts in tqdm(textdataset.items()):
-#         if not os.path.exists(os.path.join(audiopath, sample)):
-#             os.makedirs(os.path.join(audiopath, sample))
+    print("Generating Audio...")    
+    for sample, texts in tqdm(textdataset.items()):
+        if not os.path.exists(os.path.join(audiopath, sample)):
+            os.makedirs(os.path.join(audiopath, sample))
             
-#         newtxt=[]
-#         indexes=[]
-#         for idx,i in enumerate(texts):
-#             tokenized_sentence = nltk.sent_tokenize(i)
-#             indexes += [idx]*len(tokenized_sentence)
-#             newtxt += tokenized_sentence
+        newtxt=[]
+        indexes=[]
+        for idx,i in enumerate(texts):
+            tokenized_sentence = nltk.sent_tokenize(i)
+            indexes += [idx]*len(tokenized_sentence)
+            newtxt += tokenized_sentence
 
-#         inputs = processor(text=newtxt, return_tensors="pt", voice_preset="v2/en_speaker_"+str(speaker))
-#         inputs = {key:value.to(device) for key,value in inputs.items()}
-#         speech_values = model.generate(**inputs).cpu().numpy().squeeze()
+        inputs = processor(text=newtxt, return_tensors="pt", voice_preset="v2/en_speaker_"+str(speaker))
+        inputs = {key:value.to(device) for key,value in inputs.items()}
+        speech_values = model.generate(**inputs, min_eos_p=0.1).cpu().numpy().squeeze()
 
-#         count = 1
-#         partaudio=[]
-#         for i,audio in enumerate(speech_values):
-#             partaudio = np.concatenate([partaudio,audio])
-#             if i==len(indexes)-1:
-#                 scipy.io.wavfile.write(os.path.join(audiopath,sample,"audio_"+str(count)+".wav"), rate=model.generation_config.sample_rate, data=np.int16(partaudio / 256.0))
-#             elif indexes[i]!=indexes[i+1]:
-#                 scipy.io.wavfile.write(os.path.join(audiopath,sample,"audio_"+str(count)+".wav"), rate=model.generation_config.sample_rate, data=np.int16(partaudio / 256.0))
-#                 partaudio=[]
-#                 count+=1
+        count = 1
+        partaudio=[]
+        for i,audio in enumerate(speech_values):
+            partaudio = np.concatenate([partaudio,audio])
+            if i==len(indexes)-1:
+                scipy.io.wavfile.write(os.path.join(audiopath,sample,"audio_"+str(count)+".wav"), rate=model.generation_config.sample_rate, data=np.int16(partaudio / 256.0))
+            elif indexes[i]!=indexes[i+1]:
+                scipy.io.wavfile.write(os.path.join(audiopath,sample,"audio_"+str(count)+".wav"), rate=model.generation_config.sample_rate, data=np.int16(partaudio / 256.0))
+                partaudio=[]
+                count+=1
 
 def concatenate_videos(videopath="intermediate"):
     print("Concatenting Videos...")
