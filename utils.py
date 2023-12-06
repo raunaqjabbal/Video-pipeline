@@ -101,7 +101,7 @@ def generate_audio2(textdataset, audiopath="intermediate", speaker = 1):
 
         inputs = processor(text=newtxt, return_tensors="pt", voice_preset="v2/en_speaker_"+str(speaker))
         inputs = {key:value.to(device) for key,value in inputs.items()}
-        speech_values = model.generate(**inputs, min_eos_p=0.1).cpu().numpy().squeeze()
+        speech_values = model.generate(**inputs, min_eos_p=0.05).cpu().numpy().squeeze()
 
         count = 1
         partaudio=[]

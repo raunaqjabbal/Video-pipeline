@@ -1,20 +1,12 @@
 import os
-import glob
-import shutil
 from pathlib import Path
 import time
-import subprocess
-import argparse
 import gc
 from .procedures.av_scripts import *
 
 
 from .first_order_model.demo import load_checkpoints
 from .procedures.fomm_scripts import FOMM_chop_refvid, FOMM_run
-
-from .procedures.wav2lip_scripts import wav2lip_run
-from .procedures.qvi_scripts import qvi_config
-
 
 def run(face, audio_super = 'intermediate', ref_vid = 'inputs/ref_video/syn_reference.mp4', ref_vid_offset = [0], frame_int = None, clear_outputs=True, save_path = None):
 
