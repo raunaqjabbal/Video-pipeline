@@ -161,7 +161,8 @@ def upscale_avatar(avatarpath="intermediate"):
     print("Upscaling avatars...")
     for i in tqdm(os.listdir(avatarpath)):
         location = os.path.join(avatarpath,i,"Avatar.mp4")
-        os.system(f"python Real-ESRGAN/inference_realesrgan_video.py -i {location} -n realesr-animevideov3 -s 2 -o {os.path.join(avatarpath,i)}")
+        os.system(f"python Real-ESRGAN/inference_realesrgan_video.py -i {location} -n realesr-animevideov3 -s 2 -suffix x2 -o {os.path.join(avatarpath,i)}")
+        os.remove(location)
         
 # def upscale_avatar2(avatarpath):
 #     os.system(f"python Real-ESRGAN/inference_realesrgan_video.py -i {avatarpath} -n realesr-animevideov3 -s 2 --suffix x2 -o {avatarpath}")
