@@ -25,7 +25,7 @@ def image_matting(background_image, face_image, mask_folder, output_folder):
     matte = np.repeat(np.asarray(matte)[:, :, None], 3, axis=2) / 255
     foreground = image * matte + background * (1 - matte)
     final = Image.fromarray(np.uint8(foreground))
-    final.save(output_folder + '/matte_' + matte_name)
+    final.save(os.path.join(output_folder, matte_name))
   
 def matte_preview(speaker_vid, background, bg_resize, spkr_resize, offset):
 
