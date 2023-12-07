@@ -11,14 +11,8 @@ import os
 def crop_face(filename, outfile):
     #downloading model weights
     
-    if not os.path.exists("DEMO"):
-        os.makedirs("DEMO")
-
     # Download the file from Google Drive
-    file_path = os.path.join(cache_dir, "shape_predictor.dat")
-
-    gdown.download("https://drive.google.com/uc?id=1huhv8PYpNNKbGCLOaYUjOgR1pY5pmbJx", file_path, quiet=False)
-    predictor = dlib.shape_predictor(file_path)
+    predictor = dlib.shape_predictor("./LIHQ/procedures/face_align/cache")
     
 
     # f=open_url("https://drive.google.com/uc?id=1huhv8PYpNNKbGCLOaYUjOgR1pY5pmbJx", cache_dir="cache", return_path=True)

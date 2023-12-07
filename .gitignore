@@ -5,7 +5,13 @@ LIHQ/Wav2Lip/checkpoints/wav2lip_gan.pth
 LIHQ/Wav2Lip/checkpoints/wav2lip.pth
 LIHQ/Wav2Lip/face_detection/detection/sfd/s3fd.pth
 LIHQ/MODNet/pretrained/modnet_photographic_portrait_matting.ckpt
-
+LIHQ/procedures/face_align/cache
+demo.py
+demo.ipynb
+preprocess
+Real-ESRGAN/weights
+gfpgan/weights
+gfpgan/gfpgan/weights
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

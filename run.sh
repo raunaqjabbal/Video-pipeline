@@ -5,15 +5,25 @@ pip install -q git+https://github.com/suno-ai/bark.git
 
 
 cd Real-ESRGAN
-pip install -qr requirements.txt
-pip install -q basicsr facexlib gfpgan ffmpeg-python
 pip install .
 cd ..
 
-##FOMM
+# Face Crop
+gdown 1huhv8PYpNNKbGCLOaYUjOgR1pY5pmbJx -O './LIHQ/procedures/face_align/cache'
+
 
 cd LIHQ
 pip install -r requirements.txt
+
+## ESRGAN
+wget https://github.com/xinntao/Real-ESRGAN/releases/download/v0.2.5.0/realesr-animevideov3.pth -O "Real-ESRGAN/weights/realesr-animevideov3.pth"
+wget https://github.com/xinntao/Real-ESRGAN/releases/download/v0.1.0/RealESRGAN_x4plus.pth     -O "Real-ESRGAN/weights/RealESRGAN_x4plus.pth"
+
+## GFPGAN
+wget ttps://github.com/xinntao/facexlib/releases/download/v0.2.2/parsing_parsenet.pth" -O "GFPGAN/weights/parsing_parsenet.pth"
+wget https://github.com/xinntao/facexlib/releases/download/v0.1.0/detection_Resnet50_Final.pth" -O "GFPGAN/weights/detection_Resnet50_Final.pth"
+
+## FOMM
 
 cd first_order_model
 # getting model weights

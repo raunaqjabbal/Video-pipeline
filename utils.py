@@ -17,23 +17,59 @@ from tqdm import tqdm
 import sys
 # codec="libx264"
 import shutil
+import subprocess
+
 
 os.environ['SUNO_OFFLOAD_CPU'] = 'True'
 os.environ['SUNO_USE_SMALL_MODELS'] = 'True'
-from bark.generation import generate_text_semantic,preload_models
-from bark.api import semantic_to_waveform
-from bark import generate_audio, SAMPLE_RATE
+# from bark.generation import generate_text_semantic,preload_models
+# from bark.api import semantic_to_waveform
+# from bark import generate_audio, SAMPLE_RATE
 
 sys.path.append(os.path.join( "LIHQ", "first_order_model"))
 sys.path.append(os.path.join( "LIHQ", "procedures"))
 
-from LIHQ import runLIHQ
+# from LIHQ import runLIHQ
 from LIHQ.procedures.wav2lip_scripts import wav2lip_run
-from LIHQ.procedures.face_align.face_crop import crop_face
+from LIHQ.procedures.face_align.face_crop import crop_face as _crop_face
+from LIHQ.procedures.matting_scripts import image_matting as _image_matting
 
+
+def preprocess_avatar(inputpath):
+    if not os.path.exists("preprocess"):
+        os.mkdir(os.path.join("preprocess"))
+    
+    print("Cropping faces...") 
+    croppath = os.path.join("preprocess","cropped")
+    if not os.path.exists(croppath):
+        os.mkdir(croppath)
+    # for i in os.listdir(inputpath):
+    #     crop_face(os.path.join(inputpath,i), os.path.join("preprocess","cropped", i))
+    
+    
+    print("Upscaling faces...") 
+    # upscalepath = os.path.join("preprocess","upscaled")
+    # if not os.path.exists(upscalepath):
+        # os.mkdir(upscalepath)
+    for i in os.listdir(croppath):
+        upscale_image(os.path.join(croppath,i), "preprocess")
+
+def crop_face(inputpath, outputpath):
+    _crop_face(inputpath,outputpath)
 
 def upscale_image(inputpath, outputpath):
-    os.system(f"python Real-ESRGAN/inference_gfpgan.py -i {inputpath} -o {outputpath} -v 1.3 -s 4 --bg_upsampler realesrgan")
+    filepath = os.path.join("gfpgan", "inference_gfpgan.py")
+    subprocess.call(f"python {filepath} -i {inputpath} -o {outputpath} -v 1.3 -s 4 --bg_upsampler realesrgan", shell=True)
+    #  -n realesr-animevideov3 / RealESRGAN_x4plus
+ 
+def image_mask(inputpath, outputpath):
+    os.chdir("./LIHQ/MODNet")
+    subprocess.call(f"python -m demo.image_matting.colab.inference --input-path {inputpath} --output-path {outputpath} --ckpt-path ./pretrained/modnet_photographic_portrait_matting.ckpt", shell=True)
+    os.chdir("..")
+    os.chdir("..")
+    
+def image_matting(inputpath, outputpath, maskpath, backgroundpath):
+    _image_matting(backgroundpath, inputpath, maskpath, outputpath)
 
 # def demo():
 #     clip = VideoFileClip("drive/MyDrive/Content Video Production/non_interactive_sample (with audio)/FinalAV.mp4")
