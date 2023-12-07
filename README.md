@@ -10,9 +10,8 @@ bash run.sh
 ```
 Installs requirmements and downloads models, can take 10+ mins.
 
-## Pipeline:
 
-### Preprocessing:
+## Preprocessing:
 
 Generating an avatar face:
 
@@ -22,4 +21,16 @@ Generating an avatar face:
 
 ### Image MAtting (Optional)
 
-### 
+### Add background (Optional)
+
+
+
+## Generate Audio
+
+## Merge Audio and Video
+
+## LiHQ
+
+## Wav2Lip
+
+## 
