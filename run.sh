@@ -4,9 +4,9 @@ pip install  -r requirements.txt
 pip install git+https://github.com/suno-ai/bark.git
 
 
-# cd Real-ESRGAN
-# pip install .
-# cd ..
+cd Real-ESRGAN
+pip install .
+cd ..
 
 # Face Crop
 gdown 1huhv8PYpNNKbGCLOaYUjOgR1pY5pmbJx -O './LIHQ/cache'
