@@ -34,6 +34,7 @@ sys.path.append(os.path.join( "LIHQ", "first_order_model"))
 sys.path.append(os.path.join( "LIHQ", "procedures"))
 
 from LIHQ.face_crop import crop_face as crop_face #################################################
+from LIHQ.first_order_model.demo import load_checkpoints, make_animation
 
 
 def preprocess_avatar(inputfolder, backgroundpath=None, outputfolder="inputs/preprocessed_faces"):
@@ -176,7 +177,6 @@ def generate_audio2(textdataset, projectpath="intermediate", speaker = 1):
                 partaudio=[]
                 count+=1
 
-from .LIHQ.first_order_model.demo import load_checkpoints, make_animation
 
 def chop_refvid(projectpath="intermediate", ref_vid='inputs/ref_video/syn_reference.mp4'):
     i = 0
