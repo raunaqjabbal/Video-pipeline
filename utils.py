@@ -89,11 +89,11 @@ def image_matting(inputpath, outputpath, maskpath, backgroundpath):
 #     audio = clip.audio
 #     audio.write_audiofile("CompleteAudio.mp3")
 
-def generate_audio(textdataset, audiopath="intermediate", speaker = 1):
+def generate_audio(textdataset, projectpath="intermediate", speaker = 1):
     print("Generating Audio...")    
     for sample, texts in tqdm(textdataset.items()):
-        if not os.path.exists(os.path.join(audiopath, sample)):
-            os.makedirs(os.path.join(audiopath, sample))
+        if not os.path.exists(os.path.join(projectpath, sample)):
+            os.makedirs(os.path.join(projectpath, sample))
             
         newtxt=[]
         indexes=[]
@@ -123,14 +123,14 @@ def generate_audio(textdataset, audiopath="intermediate", speaker = 1):
         for i,audio in enumerate(speech_values):
             partaudio = np.concatenate([partaudio,audio])
             if i==len(indexes)-1:
-                scipy.io.wavfile.write(os.path.join(audiopath,sample,"audio_"+str(count)+".wav"), rate=SAMPLE_RATE, data=partaudio)
+                scipy.io.wavfile.write(os.path.join(projectpath,sample,"audio_"+str(count)+".wav"), rate=SAMPLE_RATE, data=partaudio)
             elif indexes[i]!=indexes[i+1]:
-                scipy.io.wavfile.write(os.path.join(audiopath,sample,"audio_"+str(count)+".wav"), rate=SAMPLE_RATE, data=partaudio)
+                scipy.io.wavfile.write(os.path.join(projectpath,sample,"audio_"+str(count)+".wav"), rate=SAMPLE_RATE, data=partaudio)
                 partaudio=[]
                 count+=1
 
 
-def generate_audio2(textdataset, audiopath="intermediate", speaker = 1):
+def generate_audio2(textdataset, projectpath="intermediate", speaker = 1):
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
     processor = AutoProcessor.from_pretrained("suno/bark-small")
     model = AutoModel.from_pretrained("suno/bark-small",torch_dtype=torch.float16).to(device)
@@ -138,8 +138,8 @@ def generate_audio2(textdataset, audiopath="intermediate", speaker = 1):
 
     print("Generating Audio...")    
     for sample, texts in tqdm(textdataset.items()):
-        if not os.path.exists(os.path.join(audiopath, sample)):
-            os.makedirs(os.path.join(audiopath, sample))
+        if not os.path.exists(os.path.join(projectpath, sample)):
+            os.makedirs(os.path.join(projectpath, sample))
             
         newtxt=[]
         indexes=[]
@@ -157,81 +157,107 @@ def generate_audio2(textdataset, audiopath="intermediate", speaker = 1):
         for i,audio in enumerate(speech_values):
             partaudio = np.concatenate([partaudio,audio])
             if i==len(indexes)-1:
-                scipy.io.wavfile.write(os.path.join(audiopath,sample,"audio_"+str(count)+".wav"), rate=model.generation_config.sample_rate, data=partaudio)
+                scipy.io.wavfile.write(os.path.join(projectpath,sample,"audio_"+str(count)+".wav"), rate=model.generation_config.sample_rate, data=partaudio)
             elif indexes[i]!=indexes[i+1]:
-                scipy.io.wavfile.write(os.path.join(audiopath,sample,"audio_"+str(count)+".wav"), rate=model.generation_config.sample_rate, data=partaudio)
+                scipy.io.wavfile.write(os.path.join(projectpath,sample,"audio_"+str(count)+".wav"), rate=model.generation_config.sample_rate, data=partaudio)
                 partaudio=[]
                 count+=1
 
 
-def wav2lip(path="intermediate"):
+def wav2lip(projectpath="intermediate"):
     gc.collect()
     print("Running Wav2Lip")
-    for i in tqdm(os.listdir(path)):
-        wav2lip_run(i)
+    for i in tqdm(os.listdir(projectpath)):
+        # wav2lip_run(i)
+        vid_path = f'{os.getcwd()}/intermediate/{i}/FOMM-complete.mp4'
+        if os.path.exists(f'{os.getcwd()}/intermediate/{i}/Audio.wav'):
+            aud_path = f'{os.getcwd()}/intermediate/{i}/Audio.wav'
+        else:
+            aud_path = f'{os.getcwd()}/intermediate/{i}/{i}.wav'
+        out_path = f'{os.getcwd()}/intermediate/{i}/Avatar.mp4'
+        os.chdir('LIHQ/Wav2Lip')
+        command = f'python inference.py --checkpoint_path checkpoints/wav2lip.pth --face {vid_path} --audio {aud_path} --outfile {out_path}  --pads 0 20 0 0'
+        try:
+            # subprocess.call(command, shell=True)
+            process = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
+            while True:
+                output = process.stdout.readline()
+                if output == '' and process.poll() is not None:
+                    break
+                if output:
+                    print(output.strip())
+            print(f"Script execution completed with exit code:", process.poll())
+        except subprocess.CalledProcessError:
+            print("Wav2ip failed: ", i)
+        os.chdir('..')
+        os.chdir('..')
+        if os.path.exists(out_path):
+            os.remove(vid_path)
+        else:
+            print("Wav2ip failed: ", i)
+        
+        
+        
 
-def concatenate_videos(videopath="intermediate"):
+def concatenate_videos(projectpath="intermediate"):
     print("Concatenting Videos...")
-    for i in tqdm(os.listdir(videopath)):
-        clips = [_VideoFileClip(os.path.join(j)) for j in sorted(glob.glob(os.path.join(videopath,i,"*video*")))]
+    for i in tqdm(os.listdir(projectpath)):
+        clips = [_VideoFileClip(os.path.join(j)) for j in sorted(glob.glob(os.path.join(projectpath,i,"*video*")))]
         clip = _concatenate_videoclips(clips)
-        clip.write_videofile(os.path.join(videopath,i,"Video.mp4"), verbose=False, logger=None)
+        clip.write_videofile(os.path.join(projectpath,i,"Video.mp4"), verbose=False, logger=None)
 
-def concatenate_audios(audiopath="intermediate"):
+def concatenate_audios(projectpath="intermediate"):
     print("Concatenating Audios...")
-    for i in tqdm(os.listdir(audiopath)):
-        clips = [_AudioFileClip(os.path.join(j)) for j in sorted(glob.glob(os.path.join(audiopath,i,"*audio*")))]
+    for i in tqdm(os.listdir(projectpath)):
+        clips = [_AudioFileClip(os.path.join(j)) for j in sorted(glob.glob(os.path.join(projectpath,i,"*audio*")))]
         clip = _concatenate_audioclips(clips)
-        clip.write_audiofile(os.path.join(audiopath,i,"Audio.wav"), verbose=False, logger=None)
+        clip.write_audiofile(os.path.join(projectpath,i,"Audio.wav"), verbose=False, logger=None)
     
-    if os.path.exists(os.path.join(audiopath,i,"Audio.wav")):
-        for j in sorted(glob.glob(os.path.join(audiopath,i,"*audio*"))):
+    if os.path.exists(os.path.join(projectpath,i,"Audio.wav")):
+        for j in sorted(glob.glob(os.path.join(projectpath,i,"*audio*"))):
             if not j.endswith("Audio.wav"):
                 os.remove(j)
             
 
 
 # Merge Audio with Video
-def merge_audio_video(audiopath="intermediate",videopath="inputs/videos", type = "delay"):
+def merge_audio_video(projectpath="intermediate",videopath="inputs/videos", type = "delay"):
     print("Merging audios and videos...")
-    for i in tqdm(os.listdir(audiopath)):
+    for i in tqdm(os.listdir(projectpath)):
         idx=1
-        for j in sorted(os.listdir(os.path.join(audiopath, i))):
+        for j in sorted(os.listdir(os.path.join(projectpath, i))):
             if j.startswith("audio"):
-                audio_clip = _AudioFileClip(os.path.join(audiopath,i,j))
+                audio_clip = _AudioFileClip(os.path.join(projectpath,i,j))
                 video_clip = _VideoFileClip(os.path.join(videopath,i,f"video_{idx}.mp4"))
 
                 if type=="delay":
                     concat_clip = video_clip.to_ImageClip(t=video_clip.duration-1, duration=audio_clip.duration-video_clip.duration)
                     concat_clip = _concatenate_videoclips([video_clip, concat_clip])
                     concat_clip = concat_clip.set_audio(audio_clip)
-                    concat_clip.write_videofile(os.path.join(audiopath,i,f'video_{idx}.mp4'), verbose = False, logger = None)
+                    concat_clip.write_videofile(os.path.join(projectpath,i,f'video_{idx}.mp4'), verbose = False, logger = None)
                     idx+=1
                 elif type=="scale":
                     slowed_clip = video_clip.fx(_vfx.speedx, video_clip.duration / audio_clip.duration)
                     slowed_clip = slowed_clip.set_audio(audio_clip)
-                    slowed_clip.write_videofile(os.path.join(audiopath,i,f'video_{idx}.mp4'), verbose = False, logger = None)
+                    slowed_clip.write_videofile(os.path.join(projectpath,i,f'video_{idx}.mp4'), verbose = False, logger = None)
                     idx+=1
 
-def upscale_avatar(avatarpath="intermediate"):
+def upscale_avatar(projectpath="intermediate"):
     print("Upscaling avatars...")
-    for i in tqdm(os.listdir(avatarpath)):
-        location = os.path.join(avatarpath,i,"Avatar.mp4")
-        os.system(f"python Real-ESRGAN/inference_realesrgan_video.py -i {location} -n realesr-animevideov3 -s 2 -suffix x2 -o {os.path.join(avatarpath,i)}")
+    for i in tqdm(os.listdir(projectpath)):
+        location = os.path.join(projectpath,i,"Avatar.mp4")
+        os.system(f"python Real-ESRGAN/inference_realesrgan_video.py -i {location} -n realesr-animevideov3 -s 2 -suffix x2 -o {os.path.join(projectpath,i)}")
         os.remove(location)
         
-# def upscale_avatar2(avatarpath):
-#     os.system(f"python Real-ESRGAN/inference_realesrgan_video.py -i {avatarpath} -n realesr-animevideov3 -s 2 --suffix x2 -o {avatarpath}")
-
-def merge_video_avatar(avatarpath="intermediate", outputpath="results",  padding=10, location="left", speed=1):
+def merge_video_avatar(projectpath="intermediate", outputpath="results",  padding=10, location="left", speed=1):
     if not os.path.exists(outputpath):
         os.makedirs(outputpath)
     print("Merging video with avatar... ")
-    for i in tqdm(os.listdir(avatarpath)):
-        clip = _VideoFileClip(os.path.join(avatarpath,i,"Video.mp4"))
+    for i in tqdm(os.listdir(projectpath)):
+        clip = _VideoFileClip(os.path.join(projectpath,i,"Video.mp4"))
         clip1 = clip.without_audio()
 
-        clip2 = _VideoFileClip(os.path.join(avatarpath,i,"Avatar.mp4"))
+        clip2 = _VideoFileClip(os.path.join(projectpath,i,"Avatar.mp4"))
         clip2 = clip2.resize(0.20)
         print(clip1.duration==clip2.duration)
         if location=="right":
@@ -251,7 +277,6 @@ def merge_video_avatar(avatarpath="intermediate", outputpath="results",  padding
             video = video.fx(_vfx.speedx, speed)
             video.audio = _AudioFileClip(audiopath)   
             video.write_videofile(videopath,  verbose = False, logger = None)
-    
             os.remove(audiopath)
 
 def change_video_speed(videopath, speed=1):
