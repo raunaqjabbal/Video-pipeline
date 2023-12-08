@@ -183,6 +183,13 @@ def concatenate_audios(audiopath="intermediate"):
         clips = [_AudioFileClip(os.path.join(j)) for j in sorted(glob.glob(os.path.join(audiopath,i,"*audio*")))]
         clip = _concatenate_audioclips(clips)
         clip.write_audiofile(os.path.join(audiopath,i,"Audio.wav"), verbose=False, logger=None)
+    
+    if os.path.exists(os.path.join(audiopath,i,"Audio.wav")):
+        for j in sorted(glob.glob(os.path.join(audiopath,i,"*audio*"))):
+            if not j.endswith("Audio.wav"):
+                os.remove(j)
+            
+
 
 # Merge Audio with Video
 def merge_audio_video(audiopath="intermediate",videopath="inputs/videos", type = "delay"):
