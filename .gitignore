@@ -12,6 +12,7 @@ preprocess
 Real-ESRGAN/weights
 gfpgan/weights
 gfpgan/gfpgan/weights
+intermediate/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

@@ -30,7 +30,6 @@ sys.path.append(os.path.join( "LIHQ", "first_order_model"))
 sys.path.append(os.path.join( "LIHQ", "procedures"))
 
 from LIHQ import runLIHQ
-from LIHQ.procedures.wav2lip_scripts import wav2lip_run
 from LIHQ.procedures.face_align.face_crop import crop_face as _crop_face
 from LIHQ.procedures.matting_scripts import image_matting as _image_matting
 
@@ -183,15 +182,18 @@ def wav2lip(projectpath="intermediate"):
         os.chdir('LIHQ/Wav2Lip')
         command = f'python inference.py --checkpoint_path checkpoints/wav2lip.pth --face {vid_path} --audio {aud_path} --outfile {out_path}  --pads 0 20 0 0'
         try:
-            # subprocess.call(command, shell=True)
-            process = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
-            while True:
-                output = process.stdout.readline()
-                if output == '' and process.poll() is not None:
-                    break
-                if output:
-                    print(output.strip())
-            print(f"Script execution completed with exit code:", process.poll())
+            # THIS
+            subprocess.call(command, shell=True)
+            
+            # OR ALL THIS
+            # process = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
+            # while True:
+            #     output = process.stdout.readline()
+            #     if output == '' and process.poll() is not None:
+            #         break
+            #     if output:
+            #         print(output.strip())
+            # print(f"Script execution completed with exit code:", process.poll())
         except subprocess.CalledProcessError:
             print("Wav2ip failed: ", i)
         os.chdir('..')
@@ -199,10 +201,7 @@ def wav2lip(projectpath="intermediate"):
         if os.path.exists(out_path):
             os.remove(vid_path)
         else:
-            print("Wav2ip failed: ", i)
-        
-        
-        
+            print("Wav2ip failed: ", i)        
 
 def concatenate_videos(projectpath="intermediate"):
     print("Concatenting Videos...")
@@ -221,8 +220,7 @@ def concatenate_audios(projectpath="intermediate"):
     if os.path.exists(os.path.join(projectpath,i,"Audio.wav")):
         for j in sorted(glob.glob(os.path.join(projectpath,i,"*audio*"))):
             if not j.endswith("Audio.wav"):
-                os.remove(j)
-            
+                os.remove(j)    
 
 def merge_audio_video(projectpath="intermediate",videopath="inputs/videos", kind = "delay"):
     print("Merging audios and videos...")
@@ -250,8 +248,8 @@ def upscale_avatar(projectpath="intermediate", kind= "realesr-animevideov3"):
     for i in tqdm(os.listdir(projectpath)):
         location = os.path.join(projectpath,i,"Avatar.mp4")
         os.system(f"python Real-ESRGAN/inference_realesrgan_video.py -i {location} -n {kind} -s 2 -suffix x2 -o {os.path.join(projectpath,i)}")
-        os.remove(location)
-        
+        ## HELP?
+
 def merge_video_avatar(projectpath="intermediate", outputpath="results",  padding=10, location="left", speed=1):
     if not os.path.exists(outputpath):
         os.makedirs(outputpath)

@@ -1,61 +1,54 @@
 import os
-from pathlib import Path
-import time
 import gc
-from .procedures.av_scripts import *
+import sys
+import glob
+import imageio
+import librosa
+from skimage.transform import resize
+from skimage import img_as_ubyte
+from moviepy.video.io.VideoFileClip import VideoFileClip
 
 
-from .first_order_model.demo import load_checkpoints
-from .procedures.fomm_scripts import FOMM_chop_refvid, FOMM_run
+from .first_order_model.demo import load_checkpoints, make_animation
 
-def run(face, audio_super = 'intermediate', ref_vid = 'inputs/ref_video/syn_reference.mp4', ref_vid_offset = [0], frame_int = None, clear_outputs=True, save_path = None):
-
-    #Miscellaneous things
-    print("Initializing")
-      #Turning face &offset to arrays as needed
-    if not isinstance(face, list):
-        face = [face]
-    if not isinstance(ref_vid_offset, list):
-        ref_vid_offset = [ref_vid_offset]
-
-      #Determining final fps for ffmpeg
-    if frame_int is not None:
-        fps = 25 * (frame_int + 1)
-    else:
-        fps = 25
-
-      #Deleteing output files
-    if clear_outputs == True:
-        for path in Path("./output").glob("**/*"):
-            if path.is_file():
-                path.unlink()
-
-      #A/V Set up
-    R1start = time.time()
-    if audio_super[-1:] != '/':
-        audio_super = audio_super + '/'
-    aud_dir_names = get_auddirnames(audio_super)
-    for adir in aud_dir_names:
-        combine_audiofiles(adir, audio_super)
-
-      #Expanding face array as needed
-    while len(face) < len(aud_dir_names):
-        face.append(face[0])
-        
-    gc.collect()
-    #FOMM
-      #Cropping reference video
-    FOMM_chop_refvid(aud_dir_names, ref_vid, audio_super, ref_vid_offset)
-      #Running FOMM (Mimicking facial movements from reference video)
-    print("Running First Order Motion Model")
-    generator, kp_detector = load_checkpoints(config_path='./LIHQ/first_order_model/config/vox-256.yaml', checkpoint_path='./LIHQ/first_order_model/vox-cpk.pth.tar')
+def FOMM_chop_refvid(audio_super, ref_vid):
     i = 0
-    for adir in aud_dir_names:
-        gc.collect()
-        sub_clip = f'./intermediate/{adir}/FOMM-chop.mp4'
-        FOMM_run(face[i], sub_clip, generator, kp_detector, adir, Round = "1")
-        os.remove(sub_clip)
-        i+=1
-    print("FOMM Success!")
+    for adir in os.listdir(audio_super):
+        audio = glob.glob(f'{audio_super}{adir}/*')[0]
+        audio_length = librosa.get_duration(filename = audio)
+        output_video_path = f'./{audio_super}/{adir}/FOMM.mp4'
+        with VideoFileClip(ref_vid) as video:
+            if video.duration < audio_length:
+                sys.exit('Reference video is shorter than audio. You can:'
+                        'Chop audio to multiple folders, reduce video offset,'
+                        'use a longer reference video, use shorter audio.')
+
+            new = video.subclip(0, audio_length)
+            new.write_videofile(output_video_path, audio_codec='aac')
+            i += 1
+
+def FOMM_run(face, audio_super):
+    generator, kp_detector = load_checkpoints(config_path='./LIHQ/first_order_model/config/vox-256.yaml', checkpoint_path='./LIHQ/first_order_model/vox-cpk.pth.tar')
     
-    gc.collect()
+    for adir in os.listdir(audio_super):
+        sub_clip = f'./{audio_super}/{adir}/FOMM.mp4'
+            
+        source_image = imageio.imread(face)
+        reader = imageio.get_reader(sub_clip)
+        source_image = resize(source_image, (256, 256))[..., :3]
+        fps = reader.get_meta_data()['fps']
+        driving_video = []
+        try:
+            for im in reader:
+                driving_video.append(im)
+        except RuntimeError:
+            pass
+        reader.close()
+        driving_video = [resize(frame, (256, 256))[..., :3] for frame in driving_video]
+        predictions = make_animation(source_image, driving_video, generator, kp_detector, relative = True)
+        
+        FOMM_out_path = f'./{audio_super}/{adir}/FOMM.mp4'
+        imageio.mimsave(FOMM_out_path, [img_as_ubyte(frame) for frame in predictions], fps=fps)
+        gc.collect()
+    
+  
