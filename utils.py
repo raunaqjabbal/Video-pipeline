@@ -35,54 +35,59 @@ from LIHQ.procedures.face_align.face_crop import crop_face as _crop_face
 from LIHQ.procedures.matting_scripts import image_matting as _image_matting
 
 
-def preprocess_avatar(inputpath, backgroundpath, outputpath="inputs/preprocessed_faces"):
+def preprocess_avatar(inputfolder, backgroundpath=None, outputfolder="inputs/preprocessed_faces"):
     if not os.path.exists("preprocess"):
         os.mkdir(os.path.join("preprocess"))
     
     print("Cropping faces...") 
-    croppath = os.path.join("preprocess","cropped")
-    if not os.path.exists(croppath):
-        os.mkdir(croppath)
-    for i in os.listdir(inputpath):
-        crop_face(os.path.join(inputpath,i), os.path.join("preprocess","cropped", i))
+    cropfolder = os.path.join("preprocess","cropped")
+    if not os.path.exists(cropfolder):
+        os.mkdir(cropfolder)
+    for i in os.listdir(inputfolder):
+        crop_face(os.path.join(inputfolder,i), os.path.join("preprocess","cropped", i))
     
     print("Upscaling faces...") 
-    upscalepath = os.path.join("preprocess", "upscaled")
-    upscale_image(croppath, "preprocess")
+    upscalefolder = os.path.join("preprocess", "upscaled")
+    upscale_image(cropfolder, "preprocess")
     
     print("Generating image masks...") 
-    maskpath = os.path.join("preprocess", "masks")
-    if not os.path.exists(maskpath):
-        os.mkdir(maskpath)
-    image_mask(upscalepath,maskpath)
-
-    print("Adding background...")
-    if not os.path.exists(outputpath):
-        os.mkdir(outputpath)
-    for i in os.listdir(upscalepath):
-        image_matting(os.path.join(upscalepath,i), outputpath, maskpath, backgroundpath)
+    maskfolder = os.path.join("preprocess", "masks")
+    if not os.path.exists(maskfolder):
+        os.mkdir(maskfolder)
+    image_mask(upscalefolder,maskfolder)
     
-    if len(os.listdir(inputpath))==len(os.listdir(outputpath)):
+    if not os.path.exists(outputfolder):
+        os.mkdir(outputfolder)
+        
+    if type(backgroundpath)==str:
+        print("Adding background...")
+        for i in os.listdir(upscalefolder):
+            image_matting(os.path.join(upscalefolder,i), outputfolder, maskfolder, backgroundpath)
+    
+    else:
+        shutil.copytree(upscalefolder, outputfolder, dirs_exist_ok=True)
+    
+    if len(os.listdir(inputfolder))==len(os.listdir(outputfolder)):
         shutil.rmtree("preprocess")
 
 def crop_face(inputpath, outputpath):
     _crop_face(inputpath,outputpath)
 
-def upscale_image(inputpath, outputpath):
+def upscale_image(inputfolder, outputfolder):
     filepath = os.path.join("gfpgan", "inference_gfpgan.py")
-    subprocess.call(f"python {filepath} -i {inputpath} -o {outputpath} -v 1.3 -s 4 --bg_upsampler realesrgan", shell=True)
+    subprocess.call(f"python {filepath} -i {inputfolder} -o {outputfolder} -v 1.3 -s 4 --bg_upsampler realesrgan", shell=True)
     #  -n realesr-animevideov3 / RealESRGAN_x4plus
  
-def image_mask(inputpath, outputpath):
-    inputpath = os.path.join(os.getcwd(),inputpath)
-    outputpath = os.path.join(os.getcwd(),outputpath)
+def image_mask(inputfolder, outputfolder):
+    inputfolder = os.path.join(os.getcwd(),inputfolder)
+    outputfolder = os.path.join(os.getcwd(),outputfolder)
     os.chdir("./LIHQ/MODNet")
-    subprocess.call(f"python -m demo.image_matting.colab.inference --input-path {inputpath} --output-path {outputpath} --ckpt-path ./pretrained/modnet_photographic_portrait_matting.ckpt", shell=True)
+    subprocess.call(f"python -m demo.image_matting.colab.inference --input-path {inputfolder} --output-path {outputfolder} --ckpt-path ./pretrained/modnet_photographic_portrait_matting.ckpt", shell=True)
     os.chdir("..")
     os.chdir("..")
     
-def image_matting(inputpath, outputpath, maskpath, backgroundpath):
-    _image_matting(backgroundpath, inputpath, maskpath, outputpath)
+def image_matting(inputpath, outputfolder, maskfolder, backgroundpath):
+    _image_matting(backgroundpath, inputpath, maskfolder, outputfolder)
 
 # def demo():
 #     clip = VideoFileClip("drive/MyDrive/Content Video Production/non_interactive_sample (with audio)/FinalAV.mp4")
@@ -219,9 +224,7 @@ def concatenate_audios(projectpath="intermediate"):
                 os.remove(j)
             
 
-
-# Merge Audio with Video
-def merge_audio_video(projectpath="intermediate",videopath="inputs/videos", type = "delay"):
+def merge_audio_video(projectpath="intermediate",videopath="inputs/videos", kind = "delay"):
     print("Merging audios and videos...")
     for i in tqdm(os.listdir(projectpath)):
         idx=1
@@ -230,23 +233,23 @@ def merge_audio_video(projectpath="intermediate",videopath="inputs/videos", type
                 audio_clip = _AudioFileClip(os.path.join(projectpath,i,j))
                 video_clip = _VideoFileClip(os.path.join(videopath,i,f"video_{idx}.mp4"))
 
-                if type=="delay":
+                if kind=="delay":
                     concat_clip = video_clip.to_ImageClip(t=video_clip.duration-1, duration=audio_clip.duration-video_clip.duration)
                     concat_clip = _concatenate_videoclips([video_clip, concat_clip])
                     concat_clip = concat_clip.set_audio(audio_clip)
                     concat_clip.write_videofile(os.path.join(projectpath,i,f'video_{idx}.mp4'), verbose = False, logger = None)
                     idx+=1
-                elif type=="scale":
+                elif kind=="scale":
                     slowed_clip = video_clip.fx(_vfx.speedx, video_clip.duration / audio_clip.duration)
                     slowed_clip = slowed_clip.set_audio(audio_clip)
                     slowed_clip.write_videofile(os.path.join(projectpath,i,f'video_{idx}.mp4'), verbose = False, logger = None)
                     idx+=1
 
-def upscale_avatar(projectpath="intermediate"):
+def upscale_avatar(projectpath="intermediate", kind= "realesr-animevideov3"):
     print("Upscaling avatars...")
     for i in tqdm(os.listdir(projectpath)):
         location = os.path.join(projectpath,i,"Avatar.mp4")
-        os.system(f"python Real-ESRGAN/inference_realesrgan_video.py -i {location} -n realesr-animevideov3 -s 2 -suffix x2 -o {os.path.join(projectpath,i)}")
+        os.system(f"python Real-ESRGAN/inference_realesrgan_video.py -i {location} -n {kind} -s 2 -suffix x2 -o {os.path.join(projectpath,i)}")
         os.remove(location)
         
 def merge_video_avatar(projectpath="intermediate", outputpath="results",  padding=10, location="left", speed=1):
