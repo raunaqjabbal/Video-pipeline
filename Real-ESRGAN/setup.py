@@ -9,12 +9,6 @@ import time
 version_file = 'realesrgan/version.py'
 
 
-def readme():
-    with open('README.md', encoding='utf-8') as f:
-        content = f.read()
-    return content
-
-
 def get_git_hash():
 
     def _minimal_ext_cmd(cmd):
@@ -85,7 +79,6 @@ if __name__ == '__main__':
         name='realesrgan',
         version=get_version(),
         description='Real-ESRGAN aims at developing Practical Algorithms for General Image Restoration',
-        long_description=readme(),
         long_description_content_type='text/markdown',
         author='Xintao Wang',
         author_email='xintao.wang@outlook.com',
