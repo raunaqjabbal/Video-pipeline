@@ -41,7 +41,6 @@ def get_landmark(filepath,predictor):
     img = dlib.load_rgb_image(filepath)
     dets = detector(img, 1)
     filepath = Path(filepath)
-    print(f"{filepath.name}: Number of faces detected: {len(dets)}")
     shapes = [predictor(img, d) for k, d in enumerate(dets)]
 
     lms = [np.array([[tt.x, tt.y] for tt in shape.parts()]) for shape in shapes]
@@ -92,10 +91,8 @@ def align_face(filepath,predictor):
         a = quad[2][0] - quad[1][0]
         theta = math.atan(o/a)
         deg = math.degrees(theta)
-        print(f"Rotation: {round(deg, 2)} degrees")
 
         crop_size = math.sqrt((quad[3][0] - quad[0][0])**2 + (quad[0][1] - quad[3][1])**2)
-        print(f'Crop size: {round(crop_size)} x {round(crop_size)}')
 
         ox, oy = (sum([quad[0][0], quad[1][0], quad[2][0], quad[3][0]])/4,
                      sum([-quad[0][1], -quad[1][1], -quad[2][1], -quad[3][1]])/4)
@@ -105,7 +102,6 @@ def align_face(filepath,predictor):
         qx = ox + math.cos(math.radians(angle)) * (px - ox) + math.sin(math.radians(angle)) * (py - oy)
         qy = oy - math.sin(math.radians(angle)) * (px - ox) + math.cos(math.radians(angle)) * (py - oy)
 
-        print(f'Offset: [{-round(qy)}, {round(qx)}]')       
 
         # read image
         img = PIL.Image.open(filepath)

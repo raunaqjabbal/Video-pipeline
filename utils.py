@@ -74,7 +74,6 @@ def crop_face(inputpath, outputpath):
 def upscale_image(inputfolder, outputfolder):
     filepath = os.path.join("gfpgan", "inference_gfpgan.py")
     subprocess.call(f"python {filepath} -i {inputfolder} -o {outputfolder} -v 1.3 -s 4 --bg_upsampler realesrgan", shell=True)
-    #  -n realesr-animevideov3 / RealESRGAN_x4plus
  
 def image_mask(inputfolder, outputfolder):
     inputfolder = os.path.join(os.getcwd(),inputfolder)
