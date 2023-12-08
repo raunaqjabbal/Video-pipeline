@@ -11,7 +11,7 @@ from moviepy.video.io.VideoFileClip import VideoFileClip
 
 from .first_order_model.demo import load_checkpoints, make_animation
 
-def FOMM_chop_refvid(projectpath="intermediate", ref_vid='inputs/ref_video/syn_reference.mp4'):
+def chop_refvid(projectpath="intermediate", ref_vid='inputs/ref_video/syn_reference.mp4'):
     i = 0
     for adir in os.listdir(projectpath):
         # audio = glob.glob(f'{projectpath}/{adir}/*')[0]
@@ -32,7 +32,7 @@ def FOMM_chop_refvid(projectpath="intermediate", ref_vid='inputs/ref_video/syn_r
             new.write_videofile(output_video_path, audio_codec='aac', verbose=False, logger=None)
             i += 1
 
-def FOMM_run(face, projectpath="intermediate"):
+def FOMM(face, projectpath="intermediate"):
     generator, kp_detector = load_checkpoints(config_path='./LIHQ/first_order_model/config/vox-256.yaml', checkpoint_path='./LIHQ/first_order_model/vox-cpk.pth.tar')
     
     for adir in os.listdir(projectpath):

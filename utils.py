@@ -18,6 +18,10 @@ from tqdm import tqdm
 import sys
 import shutil
 import subprocess
+import imageio
+import librosa
+from skimage.transform import resize
+from skimage import img_as_ubyte
 
 
 os.environ['SUNO_OFFLOAD_CPU'] = 'True'
@@ -29,8 +33,7 @@ from bark import generate_audio, SAMPLE_RATE
 sys.path.append(os.path.join( "LIHQ", "first_order_model"))
 sys.path.append(os.path.join( "LIHQ", "procedures"))
 
-from LIHQ import runLIHQ
-from LIHQ.face_crop import crop_face as _crop_face
+from LIHQ.face_crop import crop_face as crop_face #################################################
 
 
 def preprocess_avatar(inputfolder, backgroundpath=None, outputfolder="inputs/preprocessed_faces"):
@@ -68,9 +71,6 @@ def preprocess_avatar(inputfolder, backgroundpath=None, outputfolder="inputs/pre
     if len(os.listdir(inputfolder))==len(os.listdir(outputfolder)):
         shutil.rmtree("preprocess")
 
-def crop_face(inputpath, outputpath):
-    _crop_face(inputpath,outputpath)
-
 def upscale_image(inputfolder, outputfolder):
     filepath = os.path.join("gfpgan", "inference_gfpgan.py")
     subprocess.call(f"python {filepath} -i {inputfolder} -o {outputfolder} -v 1.3 -s 4 --bg_upsampler realesrgan", shell=True)
@@ -101,11 +101,6 @@ def image_matting(inputpath, outputfolder,maskfolder, backgroundpath):
     foreground = image * matte + background * (1 - matte)
     final = Image.fromarray(np.uint8(foreground))
     final.save(os.path.join(outputfolder, matte_name))
-    
-# def demo():
-#     clip = VideoFileClip("drive/MyDrive/Content Video Production/non_interactive_sample (with audio)/FinalAV.mp4")
-#     audio = clip.audio
-#     audio.write_audiofile("CompleteAudio.mp3")
 
 def generate_audio(textdataset, projectpath="intermediate", speaker = 1):
     print("Generating Audio...")    
@@ -180,6 +175,53 @@ def generate_audio2(textdataset, projectpath="intermediate", speaker = 1):
                 scipy.io.wavfile.write(os.path.join(projectpath,sample,"audio_"+str(count)+".wav"), rate=model.generation_config.sample_rate, data=partaudio)
                 partaudio=[]
                 count+=1
+
+from .LIHQ.first_order_model.demo import load_checkpoints, make_animation
+
+def chop_refvid(projectpath="intermediate", ref_vid='inputs/ref_video/syn_reference.mp4'):
+    i = 0
+    for adir in os.listdir(projectpath):
+        # audio = glob.glob(f'{projectpath}/{adir}/*')[0]
+        if os.path.exists(os.path.join(projectpath,adir,"Audio.wav")):
+            audio = os.path.join(projectpath,adir,"Audio.wav")
+        else:
+            audio = os.path.join(projectpath,adir,f"{adir}.wav")
+
+        audio_length = librosa.get_duration(path = audio)
+        output_video_path = f'./{projectpath}/{adir}/FOMM.mp4'
+        with _VideoFileClip(ref_vid) as video:
+            if video.duration < audio_length:
+                sys.exit('Reference video is shorter than audio. You can:'
+                        'Chop audio to multiple folders, reduce video offset,'
+                        'use a longer reference video, use shorter audio.')
+
+            new = video.subclip(0, audio_length)
+            new.write_videofile(output_video_path, audio_codec='aac', verbose=False, logger=None)
+            i += 1
+
+def FOMM(face, projectpath="intermediate"):
+    generator, kp_detector = load_checkpoints(config_path='./LIHQ/first_order_model/config/vox-256.yaml', checkpoint_path='./LIHQ/first_order_model/vox-cpk.pth.tar')
+    
+    for adir in os.listdir(projectpath):
+        sub_clip = f'./{projectpath}/{adir}/FOMM.mp4'
+            
+        source_image = imageio.imread(face)
+        reader = imageio.get_reader(sub_clip)
+        source_image = resize(source_image, (256, 256))[..., :3]
+        fps = reader.get_meta_data()['fps']
+        driving_video = []
+        try:
+            for im in reader:
+                driving_video.append(im)
+        except RuntimeError:
+            pass
+        reader.close()
+        driving_video = [resize(frame, (256, 256))[..., :3] for frame in driving_video]
+        predictions = make_animation(source_image, driving_video, generator, kp_detector, relative = True)
+
+        FOMM_out_path = f'./{projectpath}/{adir}/FOMM.mp4'
+        imageio.mimsave(FOMM_out_path, [img_as_ubyte(frame) for frame in predictions], fps=fps)
+        gc.collect()
 
 
 def wav2lip(projectpath="intermediate"):
