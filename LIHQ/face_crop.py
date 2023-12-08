@@ -1,28 +1,37 @@
+import torchvision
+from .shape_predictor import align_face
+import dlib
+import gdown
+import os
+from pathlib import Path
 import numpy as np
 import PIL
 import PIL.Image
 import scipy
-import scipy.ndimage
-import dlib
-from pathlib import Path
-from .bicubic import BicubicDownSample
 import math
+######################################
+# Stolen (and modified) from PULSE face depixelization
+# https://github.com/adamian98/pulse
+# Who stole it from someone else
 
-"""
-brief: face alignment with FFHQ method (https://github.com/NVlabs/ffhq-dataset)
-author: lzhbrian (https://lzhbrian.me)
-date: 2020.1.5
-note: code is heavily borrowed from
-    https://github.com/NVlabs/ffhq-dataset
-    http://dlib.net/face_landmark_detection.py.html
+def crop_face(filename, outfile):
+    #downloading model weights
+    
+    # Download the file from Google Drive
+    predictor = dlib.shape_predictor("./LIHQ/cache")
+    toPIL = torchvision.transforms.ToPILImage()
+    toTensor = torchvision.transforms.ToTensor()
 
-requirements:
-    apt install cmake
-    conda install Pillow numpy scipy
-    pip install dlib
-    # download face landmark model from:
-    # http://dlib.net/files/shape_predictor_68_face_landmarks.dat.bz2
-"""
+    images = []
+    faces = align_face(filename,predictor)
+    face = faces[0]
+    face = toPIL(toTensor(face).unsqueeze(0).cuda().cpu().detach().clamp(0,1)[0])
+    images.append(face)
+    face.save(outfile)
+
+    if(len(images)==0): raise Exception("No faces found. Try again with a different image.")
+    
+    
 
 def get_landmark(filepath,predictor):
     """get landmark with dlib

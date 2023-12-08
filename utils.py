@@ -8,6 +8,7 @@ from moviepy.editor import vfx as _vfx
 from transformers import AutoProcessor, AutoModel
 import torch
 import numpy as np
+from PIL import Image
 import os
 import scipy
 import nltk
@@ -15,7 +16,6 @@ import gc
 import glob
 from tqdm import tqdm
 import sys
-# codec="libx264"
 import shutil
 import subprocess
 
@@ -30,8 +30,7 @@ sys.path.append(os.path.join( "LIHQ", "first_order_model"))
 sys.path.append(os.path.join( "LIHQ", "procedures"))
 
 from LIHQ import runLIHQ
-from LIHQ.procedures.face_align.face_crop import crop_face as _crop_face
-from LIHQ.procedures.matting_scripts import image_matting as _image_matting
+from LIHQ.face_crop import crop_face as _crop_face
 
 
 def preprocess_avatar(inputfolder, backgroundpath=None, outputfolder="inputs/preprocessed_faces"):
@@ -85,9 +84,25 @@ def image_mask(inputfolder, outputfolder):
     os.chdir("..")
     os.chdir("..")
     
-def image_matting(inputpath, outputfolder, maskfolder, backgroundpath):
-    _image_matting(backgroundpath, inputpath, maskfolder, outputfolder)
 
+def image_matting(inputpath, outputfolder,maskfolder, backgroundpath):
+    image_name = inputpath
+    matte_name = os.path.basename(image_name).split('.')[0] + '.png'
+    background = Image.open(backgroundpath) #Set background image
+    image = Image.open(inputpath)
+    matte = Image.open(os.path.join(maskfolder, matte_name))
+
+    #Reshaping background as needed
+    if background.size != image.size:
+        background = background.resize((image.size[0], image.size[1]))
+
+    #Matte transformaiton
+    image = np.asarray(image)
+    matte = np.repeat(np.asarray(matte)[:, :, None], 3, axis=2) / 255
+    foreground = image * matte + background * (1 - matte)
+    final = Image.fromarray(np.uint8(foreground))
+    final.save(os.path.join(outputfolder, matte_name))
+    
 # def demo():
 #     clip = VideoFileClip("drive/MyDrive/Content Video Production/non_interactive_sample (with audio)/FinalAV.mp4")
 #     audio = clip.audio

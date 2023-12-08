@@ -46,9 +46,7 @@ def FOMM_run(face, audio_super):
         reader.close()
         driving_video = [resize(frame, (256, 256))[..., :3] for frame in driving_video]
         predictions = make_animation(source_image, driving_video, generator, kp_detector, relative = True)
-        
+
         FOMM_out_path = f'./{audio_super}/{adir}/FOMM.mp4'
         imageio.mimsave(FOMM_out_path, [img_as_ubyte(frame) for frame in predictions], fps=fps)
         gc.collect()
-    
-  

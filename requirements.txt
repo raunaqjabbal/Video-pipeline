@@ -10,8 +10,24 @@ setuptools==58.2.0
 imageio
 
 
+# LIHQ
+opencv-contrib-python>=4.2.0.34 #Wav2Lip
+tb-nightly #GFPGAN
+yapf #GFPGAN
+basicsr>=1.3.4.0 #GFPGAN
+facexlib>=0.2.0.3 #GFPGAN
+addict #GFPGAN
+PyYAML==5.1 #FOMM
+pydub
+ffmpeg
+imageio_ffmpeg
+ffmpeg-python
+
+librosa==0.9.1 #for mel positional argument error
+
 # Real-ESRGAN
 # basicsr>=1.4.2
+
 facexlib>=0.2.5
 gfpgan>=1.3.5
 numpy
@@ -21,17 +37,6 @@ torch>=1.7
 torchvision
 tqdm
 
-ffmpeg-python
-
-######################################## Required For Colab Run
-#phonemizer==2.2.1 #VITS
-#Unidecode==1.1.1 #VITS
-opencv-contrib-python>=4.2.0.34 #Wav2Lip
-# PyYAML==5.1 #FOMM
-pydub
-ffmpeg
-imageio_ffmpeg
-librosa==0.9.1
 
 
 ########################################Already Installed in colab

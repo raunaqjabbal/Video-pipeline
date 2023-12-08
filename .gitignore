@@ -13,7 +13,7 @@ Real-ESRGAN/weights
 gfpgan/weights
 gfpgan/gfpgan/weights
 intermediate/
-
+LIHQ/cache
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
