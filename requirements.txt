@@ -8,8 +8,6 @@ scikit-learn
 llvmlite
 setuptools==58.2.0
 imageio
-
-
 # LIHQ
 opencv-contrib-python>=4.2.0.34 #Wav2Lip
 tb-nightly #GFPGAN

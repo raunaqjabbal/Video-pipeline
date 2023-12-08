@@ -1,5 +1,4 @@
 import torchvision
-from .shape_predictor import align_face
 import dlib
 import gdown
 import os
