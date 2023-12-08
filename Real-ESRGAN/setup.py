@@ -96,5 +96,4 @@ if __name__ == '__main__':
         ],
         license='BSD-3-Clause License',
         setup_requires=['cython', 'numpy'],
-        install_requires=get_requirements(),
         zip_safe=False)
