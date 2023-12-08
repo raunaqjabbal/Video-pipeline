@@ -1,7 +1,7 @@
 # cd Video-pipeline
-pip install -q -r requirements.txt
+pip install  -r requirements.txt
 
-pip install -q git+https://github.com/suno-ai/bark.git
+pip install git+https://github.com/suno-ai/bark.git
 
 
 cd Real-ESRGAN

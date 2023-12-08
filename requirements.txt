@@ -15,7 +15,7 @@ yapf #GFPGAN
 basicsr>=1.3.4.0 #GFPGAN        ############
 facexlib>=0.2.0.3 #GFPGAN       ############
 addict #GFPGAN
-PyYAML==5.1 #FOMM
+# PyYAML==5.1 #FOMM
 pydub
 ffmpeg
 imageio_ffmpeg
