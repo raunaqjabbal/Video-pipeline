@@ -51,8 +51,7 @@ __gitsha__ = '{}'
 version_info = ({})
 """
     sha = get_hash()
-    with open('VERSION', 'r') as f:
-        SHORT_VERSION = f.read().strip()
+    SHORT_VERSION = "0.3.0"
     VERSION_INFO = ', '.join([x if x.isdigit() else f'"{x}"' for x in SHORT_VERSION.split('.')])
 
     version_file_str = content.format(time.asctime(), SHORT_VERSION, sha, VERSION_INFO)
