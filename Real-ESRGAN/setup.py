@@ -33,16 +33,6 @@ def get_git_hash():
 
     return sha
 
-
-def get_hash():
-    if os.path.exists('.git'):
-        sha = get_git_hash()[:7]
-    else:
-        sha = 'unknown'
-
-    return sha
-
-
 def write_version_py():
     content = """# GENERATED VERSION FILE
 # TIME: {}
@@ -50,7 +40,7 @@ __version__ = '{}'
 __gitsha__ = '{}'
 version_info = ({})
 """
-    sha = get_hash()
+    sha = "unknown"
     SHORT_VERSION = "0.3.0"
     VERSION_INFO = ', '.join([x if x.isdigit() else f'"{x}"' for x in SHORT_VERSION.split('.')])
 
@@ -63,13 +53,6 @@ def get_version():
     with open(version_file, 'r') as f:
         exec(compile(f.read(), version_file, 'exec'))
     return locals()['__version__']
-
-
-def get_requirements(filename='requirements.txt'):
-    here = os.path.dirname(os.path.realpath(__file__))
-    with open(os.path.join(here, filename), 'r') as f:
-        requires = [line.replace('\n', '') for line in f.readlines()]
-    return requires
 
 
 if __name__ == '__main__':
@@ -95,5 +78,4 @@ if __name__ == '__main__':
         ],
         license='BSD-3-Clause License',
         setup_requires=['cython', 'numpy'],
-        install_requires=get_requirements(),
         zip_safe=False)
