@@ -13,7 +13,7 @@ gdown 1huhv8PYpNNKbGCLOaYUjOgR1pY5pmbJx -O './LIHQ/cache'
 
 
 cd LIHQ
-pip install -r requirements.txt
+# pip install -r requirements.txt
 
 ## ESRGAN
 wget https://github.com/xinntao/Real-ESRGAN/releases/download/v0.2.5.0/realesr-animevideov3.pth -O "Real-ESRGAN/weights/realesr-animevideov3.pth"
