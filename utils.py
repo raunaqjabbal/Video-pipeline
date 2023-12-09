@@ -77,12 +77,12 @@ def upscale_image(inputfolder, outputfolder):
     subprocess.call(f"python {filepath} -i {inputfolder} -o {outputfolder} -v 1.3 -s 4 --bg_upsampler realesrgan", shell=True)
  
 def image_mask(inputfolder, outputfolder):
-    inputfolder = os.path.join(os.getcwd(),inputfolder)
-    outputfolder = os.path.join(os.getcwd(),outputfolder)
-    os.chdir("./LIHQ/MODNet")
-    subprocess.call(f"python -m demo.image_matting.colab.inference --input-path {inputfolder} --output-path {outputfolder} --ckpt-path ./pretrained/modnet_photographic_portrait_matting.ckpt", shell=True)
-    os.chdir("..")
-    os.chdir("..")
+    # inputfolder = os.path.join(os.getcwd(),inputfolder)
+    # outputfolder = os.path.join(os.getcwd(),outputfolder)
+    # os.chdir("./LIHQ/MODNet")
+    subprocess.call(f"python LIHQ/MODNet/inference.py --input-path {inputfolder} --output-path {outputfolder} --ckpt-path LIHQ/MODNet/pretrained/modnet_photographic_portrait_matting.ckpt", shell=True)
+    # os.chdir("..")
+    # os.chdir("..")
     
 
 def image_matting(inputpath, outputfolder,maskfolder, backgroundpath):
