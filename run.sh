@@ -16,13 +16,13 @@ cd LIHQ
 # pip install -r requirements.txt
 
 ## ESRGAN
-wget https://github.com/xinntao/Real-ESRGAN/releases/download/v0.2.5.0/realesr-animevideov3.pth -O "Real-ESRGAN/weights/realesr-animevideov3.pth"
-wget https://github.com/xinntao/Real-ESRGAN/releases/download/v0.1.0/RealESRGAN_x4plus.pth -O "Real-ESRGAN/weights/RealESRGAN_x4plus.pth"
+wget "https://github.com/xinntao/Real-ESRGAN/releases/download/v0.2.5.0/realesr-animevideov3.pth" -O "Real-ESRGAN/weights/realesr-animevideov3.pth"
+wget "https://github.com/xinntao/Real-ESRGAN/releases/download/v0.1.0/RealESRGAN_x4plus.pth" -O "Real-ESRGAN/weights/RealESRGAN_x4plus.pth"
 
 ## GFPGAN
-wget https://github.com/TencentARC/GFPGAN/releases/download/v1.3.0/GFPGANv1.3.pth  -O "gfpgan/gfpgan/weights/GFPGANv1.3.pth"
-wget https://github.com/xinntao/facexlib/releases/download/v0.2.2/parsing_parsenet.pth -O "gfpgan/weights/parsing_parsenet.pth"
-wget https://github.com/xinntao/facexlib/releases/download/v0.1.0/detection_Resnet50_Final.pth -O "gfpgan/weights/detection_Resnet50_Final.pth"
+wget "https://github.com/TencentARC/GFPGAN/releases/download/v1.3.0/GFPGANv1.3.pth"  -O "gfpgan/gfpgan/weights/GFPGANv1.3.pth"
+wget "https://github.com/xinntao/facexlib/releases/download/v0.2.2/parsing_parsenet.pth" -O "gfpgan/weights/parsing_parsenet.pth"
+wget "https://github.com/xinntao/facexlib/releases/download/v0.1.0/detection_Resnet50_Final.pth" -O "gfpgan/weights/detection_Resnet50_Final.pth"
 
 ## FOMM
 
