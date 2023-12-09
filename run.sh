@@ -4,7 +4,7 @@ pip install  -r requirements.txt
 pip install git+https://github.com/suno-ai/bark.git
 
 # cd Real-ESRGAN
-pip install Reall-ESRGAN/.
+pip install Real-ESRGAN/.
 # cd ..
 
 # Face Crop
@@ -28,7 +28,7 @@ gdown 1eAtM-Ck5RMyMMZoQuoQfYZRU5vDDwBpK -O 'LIHQ/Wav2Lip/checkpoints/wav2lip.pth
 wget "https://www.adrianbulat.com/downloads/python-fan/s3fd-619a316812.pth" -O "LIHQ/Wav2Lip/face_detection/detection/sfd/s3fd.pth"
 
 ##MODNET
-gdown 1mcr7ALciuAsHCpLnrtG_eop5-EYhbCmz -O LIHQ/MOD/Netpretrained/modnet_photographic_portrait_matting.ckpt
+gdown 1mcr7ALciuAsHCpLnrtG_eop5-EYhbCmz -O LIHQ/MODNet/pretrained/modnet_photographic_portrait_matting.ckpt
 
 
 # SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
