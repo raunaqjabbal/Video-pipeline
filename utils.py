@@ -187,7 +187,7 @@ def chop_refvid(projectpath="intermediate", ref_vid='inputs/ref_video/syn_refere
         else:
             audio = os.path.join(projectpath,adir,f"{adir}.wav")
 
-        audio_length = librosa.get_duration(path = audio)
+        audio_length = librosa.get_duration(filename = audio)
         output_video_path = f'./{projectpath}/{adir}/FOMM.mp4'
         with _VideoFileClip(ref_vid) as video:
             if video.duration < audio_length:
@@ -200,7 +200,7 @@ def chop_refvid(projectpath="intermediate", ref_vid='inputs/ref_video/syn_refere
             i += 1
 
 def FOMM(face, projectpath="intermediate"):
-    generator, kp_detector = load_checkpoints(config_path='./LIHQ/first_order_model/config/vox-256.yaml', checkpoint_path='./LIHQ/first_order_model/vox-cpk.pth.tar')
+    generator, kp_detector = load_checkpoints(config_path='./LIHQ/first_order_model/vox-256.yaml', checkpoint_path='./LIHQ/first_order_model/vox-cpk.pth.tar')
     
     for adir in os.listdir(projectpath):
         sub_clip = f'./{projectpath}/{adir}/FOMM.mp4'
@@ -265,6 +265,11 @@ def concatenate_videos(projectpath="intermediate"):
         clips = [_VideoFileClip(os.path.join(j)) for j in sorted(glob.glob(os.path.join(projectpath,i,"*video*")))]
         clip = _concatenate_videoclips(clips)
         clip.write_videofile(os.path.join(projectpath,i,"Video.mp4"), verbose=False, logger=None)
+                
+    if os.path.exists(os.path.join(projectpath,i,"Video.mp4")):
+        for j in sorted(glob.glob(os.path.join(projectpath,i,"*video*"))):
+            if not j.endswith("Video.mp4"):
+                os.remove(j)    
 
 def concatenate_audios(projectpath="intermediate"):
     print("Concatenating Audios...")
