@@ -26,9 +26,9 @@ from skimage import img_as_ubyte
 
 os.environ['SUNO_OFFLOAD_CPU'] = 'True'
 os.environ['SUNO_USE_SMALL_MODELS'] = 'True'
-from bark.generation import generate_text_semantic,preload_models
+from bark.generation import generate_text_semantic
 from bark.api import semantic_to_waveform
-from bark import generate_audio, SAMPLE_RATE
+from bark import SAMPLE_RATE
 
 sys.path.append(os.path.join( "LIHQ", "first_order_model"))
 sys.path.append(os.path.join( "LIHQ", "procedures"))
@@ -229,7 +229,7 @@ def wav2lip(projectpath="intermediate"):
     print("Running Wav2Lip")
     for i in tqdm(os.listdir(projectpath)):
         # wav2lip_run(i)
-        vid_path = f'{os.getcwd()}/intermediate/{i}/FOMM-complete.mp4'
+        vid_path = f'{os.getcwd()}/intermediate/{i}/FOMM.mp4'
         if os.path.exists(f'{os.getcwd()}/intermediate/{i}/Audio.wav'):
             aud_path = f'{os.getcwd()}/intermediate/{i}/Audio.wav'
         else:
@@ -321,7 +321,6 @@ def merge_video_avatar(projectpath="intermediate", outputpath="results",  paddin
 
         clip2 = _VideoFileClip(os.path.join(projectpath,i,"Avatar.mp4"))
         clip2 = clip2.resize(0.20)
-        print(clip1.duration==clip2.duration)
         if location=="right":
             video = _CompositeVideoClip([clip1, clip2.set_position((clip1.size[0]-(clip2.size[0]+padding),padding))])
         else:
