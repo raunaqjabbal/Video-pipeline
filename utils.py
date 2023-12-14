@@ -41,17 +41,15 @@ from LIHQ.first_order_model.demo import load_checkpoints, make_animation
 
 
 import multiprocessing as mp
-from multiprocessing import Process
-ctx = mp.get_context('spawn')
 
 def child(func):
+    ctx = mp.get_context('spawn')
+
     def wrapper(*args, **kwargs):
         p = ctx.Process(target = func, args=args, kwargs=kwargs)
         p.start()
         p.join()
     return wrapper
-
-
 
 def preprocess_avatar(inputfolder, backgroundpath=None, outputfolder="inputs/preprocessed_faces"):
     if not os.path.exists("preprocess"):
