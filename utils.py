@@ -41,12 +41,13 @@ from LIHQ.first_order_model.demo import load_checkpoints, make_animation
 
 
 import multiprocessing as mp
+mp.set_start_method('spawn')
 
 def child(func):
-    ctx = mp.get_context('spawn')
-
     def wrapper(*args, **kwargs):
-        p = ctx.Process(target = func, args=args, kwargs=kwargs)
+        print("args: ",args)
+        print("kwargs: ",kwargs)
+        p = mp.Process(target = func, args=args, kwargs=kwargs)
         p.start()
         p.join()
     return wrapper
