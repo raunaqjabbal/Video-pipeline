@@ -1,4 +1,4 @@
-# cd Video-pipeline
+# cd video-pipeline
 pip install  -r requirements.txt
 
 pip install git+https://github.com/suno-ai/bark.git

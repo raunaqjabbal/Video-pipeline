@@ -5,7 +5,10 @@ from moviepy.editor import concatenate_audioclips as _concatenate_audioclips
 from moviepy.editor import concatenate_videoclips as _concatenate_videoclips
 from moviepy.editor import CompositeVideoClip as _CompositeVideoClip
 from moviepy.editor import vfx as _vfx
-from transformers import AutoProcessor, AutoModel
+from transformers import AutoProcessor, BarkModel
+from optimum.bettertransformer import BetterTransformer
+
+
 import torch
 import numpy as np
 from PIL import Image
@@ -35,6 +38,19 @@ sys.path.append(os.path.join( "LIHQ", "procedures"))
 
 from LIHQ.face_crop import crop_face as crop_face #################################################
 from LIHQ.first_order_model.demo import load_checkpoints, make_animation
+
+
+import multiprocessing as mp
+from multiprocessing import Process
+ctx = mp.get_context('spawn')
+
+def child(func):
+    def wrapper(*args, **kwargs):
+        p = ctx.Process(target = func, args=args, kwargs=kwargs)
+        p.start()
+        p.join()
+    return wrapper
+
 
 
 def preprocess_avatar(inputfolder, backgroundpath=None, outputfolder="inputs/preprocessed_faces"):
@@ -103,6 +119,7 @@ def image_matting(inputpath, outputfolder,maskfolder, backgroundpath):
     final = Image.fromarray(np.uint8(foreground))
     final.save(os.path.join(outputfolder, matte_name))
 
+@child
 def generate_audio(textdataset, projectpath="intermediate", speaker = 1):
     print("Generating Audio...")    
     for sample, texts in tqdm(textdataset.items()):
@@ -143,11 +160,12 @@ def generate_audio(textdataset, projectpath="intermediate", speaker = 1):
                 partaudio=[]
                 count+=1
 
-
+@child
 def generate_audio2(textdataset, projectpath="intermediate", speaker = 1):
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
     processor = AutoProcessor.from_pretrained("suno/bark-small")
-    model = AutoModel.from_pretrained("suno/bark-small",torch_dtype=torch.float16).to(device)
+    model = BarkModel.from_pretrained("suno/bark-small",torch_dtype=torch.float16).to(device)
+    model = BetterTransformer.transform(model, keep_original_model=False)
     model.enable_cpu_offload()
 
     print("Generating Audio...")    
@@ -199,6 +217,7 @@ def chop_refvid(projectpath="intermediate", ref_vid='inputs/ref_video/syn_refere
             new.write_videofile(output_video_path, audio_codec='aac', verbose=False, logger=None)
             i += 1
 
+@child
 def FOMM(face, projectpath="intermediate"):
     generator, kp_detector = load_checkpoints(config_path='./LIHQ/first_order_model/vox-256.yaml', checkpoint_path='./LIHQ/first_order_model/vox-cpk.pth.tar')
     
@@ -223,7 +242,7 @@ def FOMM(face, projectpath="intermediate"):
         imageio.mimsave(FOMM_out_path, [img_as_ubyte(frame) for frame in predictions], fps=fps)
         gc.collect()
 
-
+@child
 def wav2lip(projectpath="intermediate"):
     gc.collect()
     print("Running Wav2Lip")
