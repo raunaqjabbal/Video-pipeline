@@ -40,7 +40,9 @@ from LIHQ.face_crop import crop_face as crop_face ##############################
 from LIHQ.first_order_model.demo import load_checkpoints, make_animation
 
 
-import multiprocessing as mp
+import multiprocess as mp
+mp.set_start_method('spawn')
+
 
 def child(func):
     def wrapper(*args, **kwargs):

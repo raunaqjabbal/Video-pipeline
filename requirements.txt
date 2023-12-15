@@ -3,6 +3,7 @@ nltk
 transformers
 optimum 
 accelerate
+multiprocess
 
 scikit-learn
 llvmlite
