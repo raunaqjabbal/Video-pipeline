@@ -8,7 +8,6 @@ from moviepy.editor import vfx as _vfx
 from transformers import AutoProcessor, BarkModel
 from optimum.bettertransformer import BetterTransformer
 
-
 import torch
 import numpy as np
 from PIL import Image
